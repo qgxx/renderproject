@@ -1,0 +1,6 @@
+set(path sources/render)
+set(render_sources ${path}/texture2d.cpp 
+${path}/shader.cpp 
+${path}/mesh.cpp 
+${path}/model.cpp 
+${path}/camera.cpp)
