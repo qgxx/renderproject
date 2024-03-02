@@ -23,13 +23,16 @@ const float FOV = 45.0f;
 class Camera {
 public:
 	glm::vec3 Position;
-	glm::vec3 Front;
-	glm::vec3 Up;
-	glm::vec3 Right;
 	glm::vec3 WorldUp;
 
 	float Yaw;
 	float Pitch;
+
+	// Local/Model Space
+	glm::vec3 Front;
+	glm::vec3 Up;
+	glm::vec3 Right;
+	// Taget = Positoin + Front
 
 	float MovementSpeed;
 	float MouseSensitivity;
