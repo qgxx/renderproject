@@ -1,6 +1,15 @@
 {
     "files.associations": {
         "glad.h": "c",
-        "string": "cpp"
+        "string": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp",
+        "array": "cpp",
+        "bitset": "cpp",
+        "string_view": "cpp",
+        "span": "cpp"
     }
 }
