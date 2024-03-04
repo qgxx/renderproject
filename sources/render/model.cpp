@@ -70,7 +70,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		vertices.push_back(vertex);
 	}
-
 	// walk through each of the mesh's faces (a face is a mesh its triangle) 
 	// and retrieve the corresponding vertex indices.
 	for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
@@ -91,6 +90,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// 1. diffuse maps
 	vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	#if 0
 	// 2. specular maps
 	vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -100,6 +100,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// 4. height maps
 	vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+	#endif
 
 	return Mesh(vertices, indices, textures);
 }
@@ -109,7 +110,6 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
-		std::cout << str.C_Str() << '\n';
 		bool skip = false;
 		for (unsigned int j = 0; j < textures_loaded.size(); ++j) {
 			if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0) {

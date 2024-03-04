@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <stb/stb_image.h>
 #define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 #include <iostream>
 
 #include "render/shader.h"
@@ -78,7 +78,7 @@ int main() {
 
     // load models
     // -----------
-    Model ourModel("..\\asserts\\models\\JianXin\\JianXin.pmx");
+    Model ourModel("..\\asserts\\models\\bianka\\bianka.fbx");
 
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
