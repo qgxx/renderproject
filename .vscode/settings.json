@@ -10,6 +10,9 @@
         "array": "cpp",
         "bitset": "cpp",
         "string_view": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "memory": "cpp",
+        "random": "cpp",
+        "optional": "cpp"
     }
 }

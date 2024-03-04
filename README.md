@@ -3,6 +3,7 @@ CMAKE 3.17
 ninja 1.11  
 MinGW w64devkit-1.20.0  
 make 4.4  
+OpenGL3.3+  
 
 ## depends
 glfw  
@@ -11,7 +12,7 @@ glm
 stb  
 assimp  
 
-## 其它
+## tools
 Editor： visual studio code  
 
 Extensions：CMake Tools  
@@ -21,4 +22,5 @@ Shader languages support for VS Code
 
 # References
 [LearnOpenGL CN](https://learnopengl-cn.github.io/)  
-[LearnOpenGL](https://learnopengl.com/)
+[LearnOpenGL](https://learnopengl.com/)  
+[GAMES104](https://games104.boomingtech.com/sc/)

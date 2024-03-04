@@ -111,9 +111,6 @@ int main() {
         return -1;
     }
 
-    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-    // stbi_set_flip_vertically_on_load(true);
-
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
@@ -124,7 +121,7 @@ int main() {
 
     // load models
     // -----------
-    Model ourModel("..\\asserts\\models\\bianka\\bianka.pmx");
+    Model ourModel("..\\asserts\\models\\Karenina\\Karenina.pmx");
 
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -212,6 +209,11 @@ int main() {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        camera.increaseMovementSpeed();
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+        camera.resetMovementSpeed();
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
