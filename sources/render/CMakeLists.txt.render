@@ -2,4 +2,5 @@ set(path sources/render)
 set(render_sources ${path}/shader.cpp 
 ${path}/mesh.cpp 
 ${path}/model.cpp 
-${path}/camera.cpp)
+${path}/camera.cpp 
+${path}/skybox.cpp)

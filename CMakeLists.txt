@@ -12,4 +12,7 @@ include_directories(sources)
 
 add_executable(TinyQGameEngine sources/main.cpp ${glfw_sources} ${render_sources})
 
-target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/libassimp-5.dll)
+# copy dll to build directory
+file(COPY ${PROJECT_BINARY_DIR}/../depends/Assimp/bin/libassimp-5.dll DESTINATION ${PROJECT_BINARY_DIR}/)
+
+target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/Assimp/bin/libassimp-5.dll)
