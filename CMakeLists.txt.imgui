@@ -1,0 +1,10 @@
+include_directories(depends/imgui)
+include_directories(depends/imgui/backends)
+
+set(imgui_sources depends/imgui/imgui.cpp 
+depends/imgui/imgui_demo.cpp 
+depends/imgui/imgui_draw.cpp 
+depends/imgui/imgui_tables.cpp 
+depends/imgui/imgui_widgets.cpp 
+depends/imgui/backends/imgui_impl_glfw.cpp 
+depends/imgui/backends/imgui_impl_opengl3.cpp)

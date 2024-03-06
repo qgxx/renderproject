@@ -3,11 +3,12 @@
 
 #include "shader.h"
 
-#include <stb/stb_image.h>
 #include <iostream>
 #include <vector>
 
-std::vector<float> skyboxVertexs = {     
+using namespace std;
+
+static vector<float> skyboxVertexs = {     
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
     1.0f, -1.0f, -1.0f,
@@ -53,7 +54,7 @@ std::vector<float> skyboxVertexs = {
 
 class SkyBox {
 public:
-    SkyBox(std::string& path, std::vector<float>& ver = skyboxVertexs);
+    SkyBox(const char* path, std::vector<float>& ver = skyboxVertexs);
     ~SkyBox() = default;
     void Draw(Shader& shader);
 
@@ -61,9 +62,10 @@ private:
     unsigned int VAO, VBO;
     unsigned int cubemapTexture;
     std::vector<float> vertexs;
+    string directory;
 
     void setupSkyBox();
-    unsigned int loadCubemap(std::string& path);
+    unsigned int loadCubemap();
 };
 
 #endif // !__SKYBOX_H__
