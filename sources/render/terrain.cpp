@@ -8,6 +8,7 @@
 Terrain::Terrain(float WorldScale, const char* path) {
     mWorldScale = WorldScale;
     LoadHightMap(path);
+    mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
 }
 
 void Draw(Shader& shader) {

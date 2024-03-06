@@ -37,6 +37,7 @@ Camera camera(glm::vec3(0.0f, 10.0f, 20.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+bool m_isWireframe;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -88,6 +89,7 @@ int main() {
     skyboxShader.setInt("skybox", 0);
 
     Terrain terrain(4.0f, "..\\asserts\\others\\heightmap.save");
+    Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -96,9 +98,10 @@ int main() {
 
         processInput(window);
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        #if 1
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -107,7 +110,6 @@ int main() {
         ImGui::End();
         ImGui::ShowDemoWindow();
 
-        #if 0
         ourShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -125,10 +127,22 @@ int main() {
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
-        #endif
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        #endif
+
+        terrainShader.use();
+        view = camera.GetViewMatrix();
+        terrainShader.setMat4("view", view);
+        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
+        terrainShader.setMat4("projection", projection);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -150.0f, 0.0f)); 
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        terrainShader.setMat4("model", model);
+        terrain.Draw(terrainShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -141,6 +155,15 @@ int main() {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+        m_isWireframe = !m_isWireframe;
+        if (m_isWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
         switch (glfwGetInputMode(window, GLFW_CURSOR)) {
