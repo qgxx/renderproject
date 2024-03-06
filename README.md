@@ -21,6 +21,6 @@ Shader languages support for VS Code
 
 
 # References
-[LearnOpenGL CN](https://learnopengl-cn.github.io/)  
-[LearnOpenGL](https://learnopengl.com/)  
-[GAMES104](https://games104.boomingtech.com/sc/)
+OpenGL & basic computer graphics: [LearnOpenGL CN](https://learnopengl-cn.github.io/)  
+OpenGL & basic computer graphics: [LearnOpenGL](https://learnopengl.com/)  
+GameEngine Architecture: [GAMES104](https://games104.boomingtech.com/sc/)

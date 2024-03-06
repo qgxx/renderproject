@@ -16,6 +16,8 @@
 #include "render/camera.h"
 #include "render/model.h"
 #include "render/skybox.h"
+#include "render/terrain.h"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -77,7 +79,6 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-
     Shader ourShader("..\\asserts\\shaders\\model_loading.vert", "..\\asserts\\shaders\\model_loading.frag");
     Model ourModel("..\\asserts\\models\\Bianka\\Bianka.pmx");
 
@@ -85,6 +86,8 @@ int main() {
     Shader skyboxShader("..\\asserts\\shaders\\skybox.vert", "..\\asserts\\shaders\\skybox.frag");
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
+
+    Terrain terrain(4.0f, "..\\asserts\\others\\heightmap.save");
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -102,7 +105,9 @@ int main() {
 
         ImGui::Begin("Scene");
         ImGui::End();
+        ImGui::ShowDemoWindow();
 
+        #if 0
         ourShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -120,6 +125,7 @@ int main() {
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
+        #endif
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
