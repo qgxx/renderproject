@@ -8,11 +8,9 @@ int next_power_of2(int x) {
     return ret;
 }
 
-#define RANDOM rand
-
 float RandomFloat() {
     float Max = RAND_MAX;
-    return ((float)RANDOM() / Max);
+    return ((float)rand() / Max);
 }
 
 float RandomFloatRange(float Start, float End) {
@@ -22,9 +20,7 @@ float RandomFloatRange(float Start, float End) {
     }
 
     float Delta = End - Start;
-
     float RandomValue = RandomFloat() * Delta + Start;
-
     return RandomValue;
 }
 
