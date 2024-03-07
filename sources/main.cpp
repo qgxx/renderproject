@@ -18,7 +18,6 @@
 #include "render/skybox.h"
 #include "render/terrain.h"
 
-
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -37,7 +36,9 @@ Camera camera(glm::vec3(0.0f, 10.0f, 20.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
-bool m_isWireframe;
+bool m_isWireframe = false;
+bool m_showImgui = false;
+bool m_useCamera = false;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -77,6 +78,7 @@ int main() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(nullptr);
     const ImGuiIO& io = ImGui::GetIO();
+    ImGui::StyleColorsLight();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
@@ -101,15 +103,6 @@ int main() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        #if 1
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Scene");
-        ImGui::End();
-        ImGui::ShowDemoWindow();
-
         ourShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -128,10 +121,6 @@ int main() {
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        #endif
-
         terrainShader.use();
         view = camera.GetViewMatrix();
         terrainShader.setMat4("view", view);
@@ -143,6 +132,34 @@ int main() {
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
         terrain.Draw(terrainShader);
+
+        if (m_showImgui) {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            static int iterations = 100;
+            static float maxHeight = 200.0f;
+            static float Roughness = 1.5f;
+            ImGui::Begin("Terrain"); 
+            ImGui::SliderInt("Iterations", &iterations, 0, 1000);
+            ImGui::SliderFloat("MaxHeight", &maxHeight, 0.0f, 1000.0f);
+            ImGui::SliderFloat("Roughness", &Roughness, 0.0f, 1.0f);
+
+            if (ImGui::Button("Generate")) {
+                terrain.destroy();
+                int Size = 256;
+                float MinHeight = 0.0f;
+                terrain.CreateMidpointDisplacement(Size, Roughness, MinHeight, maxHeight);
+            }
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 
+                1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -156,6 +173,8 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) m_showImgui = !m_showImgui;
+
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
         m_isWireframe = !m_isWireframe;
         if (m_isWireframe) {
@@ -165,17 +184,11 @@ void processInput(GLFWwindow* window) {
         }
     }
 
-    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
-        switch (glfwGetInputMode(window, GLFW_CURSOR)) {
-            case GLFW_CURSOR_DISABLED:
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                break;
-            case GLFW_CURSOR_NORMAL:
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                break;
-            default:
-                break;
-        }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+        m_useCamera = !m_useCamera;
+        if (m_useCamera) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         camera.increaseMovementSpeed();
@@ -217,7 +230,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     lastX = xpos;
     lastY = ypos;
 
-    if (glfwGetInputMode(window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) return;
+    if (!m_useCamera) return;
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
