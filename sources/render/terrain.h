@@ -27,6 +27,7 @@ public:
     float GetHeight(int x, int z) const { return mHeightMap[x][z]; }
     float GetWorldScale() const { return mWorldScale; }
     void CreateMidpointDisplacement(int Size, float Roughness, float MinHeight, float MaxHeight);
+    void setMinMAxHeight(float minH, float maxH) { mMinH = minH; mMaxH = maxH; }
 
 private:
     float mWorldScale = 1.0f;
@@ -36,7 +37,6 @@ private:
     float mMinH, mMaxH;
 
     void LoadHightMap(const char* path);
-    void setMinMAxHeight(float minH, float maxH) { mMinH = minH; mMaxH = maxH; }
     void CreateMidpointDisplacementF32(float roughness);
     void diamondStep(int RectSize, float CurHeight);
     void squareStep(int RectSize, float CurHeight);

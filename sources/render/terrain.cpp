@@ -99,8 +99,8 @@ void Terrain::CreateMidpointDisplacementF32(float roughness) {
 void Terrain::diamondStep(int RectSize, float CurHeight) {
     int HalfRectSize = RectSize / 2;
 
-    for (int y = 0 ; y < mTerrainSize ; y += RectSize) {
-        for (int x = 0 ; x < mTerrainSize ; x += RectSize) {
+    for (int y = 0 ; y < mTerrainSize; y += RectSize) {
+        for (int x = 0 ; x < mTerrainSize; x += RectSize) {
             int next_x = (x + RectSize) % mTerrainSize;
             int next_y = (y + RectSize) % mTerrainSize;
 
@@ -122,7 +122,6 @@ void Terrain::diamondStep(int RectSize, float CurHeight) {
 
             float RandValue = RandomFloatRange(CurHeight, -CurHeight);
             float MidPoint = (TopLeft + TopRight + BottomLeft + BottomRight) / 4.0f;
-
             mHeightMap.set(mid_x, mid_y, MidPoint + RandValue);
         }
     }

@@ -17,6 +17,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
+#include <chrono>
 
 #include "render/shader.h"
 #include "render/camera.h"
@@ -44,7 +45,7 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool m_isWireframe = false;
 bool m_showImgui = false;
-bool m_useCamera = false;
+bool m_useCursor = false;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -78,6 +79,7 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -85,6 +87,7 @@ int main() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(nullptr);
@@ -108,7 +111,6 @@ int main() {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
         processInput(window);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -142,6 +144,7 @@ int main() {
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
+        terrain.setMinMAxHeight(0.0f, 200.0f);
         terrain.Draw(terrainShader);
 
         if (m_showImgui) {
@@ -149,11 +152,9 @@ int main() {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            static int iterations = 100;
             static float maxHeight = 200.0f;
-            static float Roughness = 1.5f;
+            static float Roughness = 1.0f;
             ImGui::Begin("Terrain"); 
-            ImGui::SliderInt("Iterations", &iterations, 0, 1000);
             ImGui::SliderFloat("MaxHeight", &maxHeight, 0.0f, 1000.0f);
             ImGui::SliderFloat("Roughness", &Roughness, 0.0f, 1.0f);
 
@@ -181,26 +182,6 @@ int main() {
 }
 
 void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) m_showImgui = !m_showImgui;
-
-    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
-        m_isWireframe = !m_isWireframe;
-        if (m_isWireframe) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        } else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
-        m_useCamera = !m_useCamera;
-        if (m_useCamera) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         camera.increaseMovementSpeed();
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
@@ -225,11 +206,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
+    if (m_useCursor) return;
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
-    if (firstMouse)
-    {
+    if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
@@ -241,10 +222,36 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     lastX = xpos;
     lastY = ypos;
 
-    if (!m_useCamera) return;
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) m_showImgui = !m_showImgui;
+
+    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+        m_isWireframe = !m_isWireframe;
+        if (m_isWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+        m_useCursor = !m_useCursor;
+        if (m_useCursor) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        else {
+            glfwSetCursorPos(window, lastX, lastY);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    }
 }
