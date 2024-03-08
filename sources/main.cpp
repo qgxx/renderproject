@@ -8,9 +8,15 @@
 #include <stb/stb_image.h>
 #include <iostream>
 #include <string>
+#include <stdlib.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <gtest/gtest.h>
+#ifdef _WIN32
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 
 #include "render/shader.h"
 #include "render/camera.h"
@@ -49,6 +55,11 @@ GLuint woodTexture;
 GLuint planeVAO;
 
 int main() {
+    #ifdef _WIN32
+    _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG );
+    _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+    #endif
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

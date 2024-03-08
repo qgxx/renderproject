@@ -18,7 +18,6 @@ float RandomFloatRange(float Start, float End) {
         printf("Invalid random range: (%f, %f)\n", Start, End);
         exit(0);
     }
-
     float Delta = End - Start;
     float RandomValue = RandomFloat() * Delta + Start;
     return RandomValue;
