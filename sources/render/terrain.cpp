@@ -1,5 +1,6 @@
 #include "terrain.h"
 #include "../core/qgemath.h"
+#include <stb/stb_image.h>
 
 #define QGERROR(msg)\
     do {\
@@ -16,6 +17,12 @@ void Terrain::Draw(Shader& shader) {
     shader.use();
     shader.setFloat("gMinHeight", mMinH);
     shader.setFloat("gMaxHeight", mMaxH);
+    string name = "gTextureHeight";
+    for (int i = 0; i < Tiles.size(); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        shader.setInt((name + to_string(i)).c_str(), i);
+        glBindTexture(GL_TEXTURE_2D, Tiles[i].id);
+    }
     mTriangleList.Draw(shader);
 }
 
@@ -164,4 +171,42 @@ void Terrain::squareStep(int RectSize, float CurHeight) {
             mHeightMap.set(x, mid_y, CurLeftMid);
         }
     }
+}
+
+void Terrain::loadTiles(const vector<pair<string, string>>& paths) {
+    for (int i = 0; i < paths.size(); i++) 
+        Tiles.push_back({TextureFromFile(paths[i].first), paths[i].second});
+}
+
+unsigned int TextureFromFile(const string& path) {
+    unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
+    if (data) {
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else {
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+    return textureID;
 }

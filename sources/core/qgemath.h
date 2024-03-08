@@ -1,6 +1,10 @@
 #ifndef __QGE_MATH_H__
 #define __QGE_MATH_H__
 
+bool isPowerOf2(int x) {
+    return (x & (x - 1));
+}
+
 int next_power_of2(int x) {
     if (x == 1) return 2;
     int ret = 1;

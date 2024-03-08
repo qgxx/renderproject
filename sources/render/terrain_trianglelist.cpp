@@ -63,6 +63,8 @@ void TriangleList::setupTriangleList(const Terrain* pTerrain) {
 
     glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));
 }
 
 void TriangleList::Draw(Shader& shader) {
@@ -75,4 +77,8 @@ void TriangleList::Vertex::InitVertex(const Terrain* pTerrain, int x, int z) {
 	float y = pTerrain->GetHeight(x, z);
 	float WorldScale = pTerrain->GetWorldScale();
     Pos = glm::vec3(x * WorldScale, y, z * WorldScale);
+
+    float sz = (float)pTerrain->getSize();
+    float texScale = pTerrain->GetTexScale();
+    Tex = glm::vec2(texScale * (float)x / sz, texScale * (float)y / sz);
 }

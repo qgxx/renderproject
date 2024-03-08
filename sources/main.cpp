@@ -104,8 +104,15 @@ int main() {
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
-    Terrain terrain(4.0f, "..\\asserts\\others\\heightmap.save");
+    Terrain terrain(2.0f, "..\\asserts\\others\\heightmap.save");
+    terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
+    vector<pair<string, string>> Tiles;
+    Tiles.push_back({"..\\asserts\\images\\tile1.jpg", "tile1"});
+    Tiles.push_back({"..\\asserts\\images\\tile2.jpg", "tile2"});
+    Tiles.push_back({"..\\asserts\\images\\tile3.png", "tile3"});
+    Tiles.push_back({"..\\asserts\\images\\tile4.png", "tile4"});
+    terrain.loadTiles(Tiles);
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
