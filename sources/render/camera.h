@@ -6,6 +6,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
+#include "model.h"
+#include "shader.h"
+
 enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
@@ -50,8 +53,11 @@ public:
 	void ProcessMouseScroll(float yoffset);
 	void increaseMovementSpeed() { MovementSpeed = SPEED * 4.0; }
 	void resetMovementSpeed() { MovementSpeed = SPEED; }
+	void setModel(const Model& m) { model = m; }
+	void Draw(Shader &shader) { model.Draw(shader); }
 
 private:
 	void updateCameraVectors();
+	Model model;
 };
 #endif // !__CAMERA_H__

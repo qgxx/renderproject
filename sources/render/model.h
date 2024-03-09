@@ -27,6 +27,7 @@ public:
 	string directory;
 	bool gammaCorrection;
 
+	Model() {};
 	Model(string const& path, bool gamma = false) : gammaCorrection(gamma) {
 		loadModel(path);
 	}

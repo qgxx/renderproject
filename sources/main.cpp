@@ -87,6 +87,10 @@ int main() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);  
+    glFrontFace(GL_CW);
+    glCullFace(GL_FRONT);
+    glEnable(GL_CULL_FACE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     IMGUI_CHECKVERSION();
@@ -147,11 +151,11 @@ int main() {
         projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
         terrainShader.setMat4("projection", projection);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -150.0f, 0.0f)); 
+        model = glm::translate(model, glm::vec3(-100.0f, -300.0f, 100.0f)); 
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
-        terrain.setMinMAxHeight(0.0f, 200.0f);
+        terrain.setMinMAxHeight(0.0f, 256.0f);
         terrain.Draw(terrainShader);
 
         if (m_showImgui) {
@@ -159,15 +163,24 @@ int main() {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            static float maxHeight = 200.0f;
+            static float maxHeight = 256.0f;
             static float Roughness = 1.0f;
             ImGui::Begin("Terrain"); 
             ImGui::SliderFloat("MaxHeight", &maxHeight, 0.0f, 1000.0f);
             ImGui::SliderFloat("Roughness", &Roughness, 0.0f, 1.0f);
 
+            static float Height0 = 64.0f;
+            static float Height1 = 128.0f;
+            static float Height2 = 192.0f;
+            static float Height3 = 256.0f;
+            ImGui::SliderFloat("Height0", &Height0, 0.0f, 64.0f);
+            ImGui::SliderFloat("Height1", &Height1, 64.0f, 128.0f);
+            ImGui::SliderFloat("Height2", &Height2, 128.0f, 192.0f);
+            ImGui::SliderFloat("Height3", &Height3, 192.0f, 256.0f);
+
             if (ImGui::Button("Generate")) {
                 terrain.destroy();
-                int Size = 256;
+                int Size = 512;
                 float MinHeight = 0.0f;
                 terrain.CreateMidpointDisplacement(Size, Roughness, MinHeight, maxHeight);
             }
