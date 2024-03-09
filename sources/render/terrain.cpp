@@ -23,7 +23,8 @@ void Terrain::Draw(Shader& shader) {
         shader.setInt((name + to_string(i)).c_str(), i);
         glBindTexture(GL_TEXTURE_2D, Tiles[i].id);
     }
-    mTriangleList.Draw(shader);
+    // mTriangleList.Draw(shader);
+    mGeoMipGrid.Draw();
 }
 
 void Terrain::LoadHightMap(const char* path) {
@@ -42,6 +43,11 @@ void Terrain::LoadHightMap(const char* path) {
     }
 
     mHeightMap.set(mTerrainSize, mTerrainSize, (float*)p);
+}
+
+void Terrain::saveHeightMap(const char* path) {
+    size_t size = mTerrainSize * mTerrainSize * sizeof(float);
+    WriteBinaryFile(path, mHeightMap.begin(), size);
 }
 
 char* ReadBinaryFile(const char* path, size_t& size) {
@@ -79,6 +85,21 @@ char* ReadBinaryFile(const char* path, size_t& size) {
     return p;
 }
 
+void WriteBinaryFile(const char* path, const void* data, size_t& size) {
+    FILE* f = NULL;
+    errno_t err = fopen_s(&f, path, "wb"); 
+    if (!f) {
+        QGERROR(string("Error opening '%s'\n") + path);
+        exit(0);
+    }
+    size_t bytes_written = fwrite(data, 1, size, f);
+    if (bytes_written != size) {
+        QGERROR("Error write file\n");
+        exit(0);
+    }
+    fclose(f);
+}
+
 void Terrain::CreateMidpointDisplacement(int Size, float Roughness, float MinHeight, float MaxHeight) {
     if (Roughness < 0.0f) exit(0);
     mTerrainSize = Size;
@@ -86,7 +107,8 @@ void Terrain::CreateMidpointDisplacement(int Size, float Roughness, float MinHei
     mHeightMap.set_all(Size, Size, 0.0f);
     CreateMidpointDisplacementF32(Roughness);
     mHeightMap.normalize(MinHeight, MaxHeight);
-    mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
+    // mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
+    mGeoMipGrid.Create(mTerrainSize, mTerrainSize, mPatchSize, this);
 }
 
 void Terrain::CreateMidpointDisplacementF32(float roughness) {

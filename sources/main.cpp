@@ -108,7 +108,7 @@ int main() {
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
-    Terrain terrain(2.0f, "..\\asserts\\others\\heightmap.save");
+    Terrain terrain(2.0f, 33);
     terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
     vector<pair<string, string>> Tiles;
@@ -180,9 +180,12 @@ int main() {
 
             if (ImGui::Button("Generate")) {
                 terrain.destroy();
-                int Size = 512;
+                int Size = 513;
                 float MinHeight = 0.0f;
                 terrain.CreateMidpointDisplacement(Size, Roughness, MinHeight, maxHeight);
+            }
+            if (ImGui::Button("Save")) {
+                terrain.saveHeightMap("..\\asserts\\others\\heightmap.save");
             }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 
