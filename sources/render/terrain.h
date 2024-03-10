@@ -29,11 +29,11 @@ public:
     Terrain(float WorldScale, int PatchSize) {
         mWorldScale = WorldScale;
         mPatchSize = PatchSize;
-        CreateMidpointDisplacement(513, 1.0f, 0.0f, 256.0f);
+        CreateMidpointDisplacement(513, 33, 1.0f, 0.0f, 256.0f);
         mGeoMipGrid.Create(513, 513, 33, this);
     }
     ~Terrain() = default;
-    void Draw(Shader& shader);
+    void Draw(Shader& shader, glm::vec3 CameraPos);
     void destroy() {
         mHeightMap.destroy();
         // mTriangleList.destroy();
@@ -46,6 +46,7 @@ public:
     void setTexScale(float scale) { mTexScale = scale; }
     int getSize() const { return mTerrainSize; }
     void CreateMidpointDisplacement(int Size, float Roughness, float MinHeight, float MaxHeight);
+    void CreateMidpointDisplacement(int Size, int PatchSize, float Roughness, float MinHeight, float MaxHeight);
     void setMinMAxHeight(float minH, float maxH) { mMinH = minH; mMaxH = maxH; }
     void loadTiles(const vector<pair<string, string>>& paths);
     void saveHeightMap(const char* path);

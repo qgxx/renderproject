@@ -12,8 +12,8 @@
 enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
-	LEFT,
-	RIGHT,
+	cLEFT,
+	cRIGHT,
 	UP,
 	DOWN
 };
@@ -51,10 +51,11 @@ public:
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
 	void ProcessMouseScroll(float yoffset);
-	void increaseMovementSpeed() { MovementSpeed = SPEED * 4.0; }
+	void increaseMovementSpeed() { MovementSpeed = SPEED * 40.0; }
 	void resetMovementSpeed() { MovementSpeed = SPEED; }
 	void setModel(const Model& m) { model = m; }
 	void Draw(Shader &shader) { model.Draw(shader); }
+	glm::vec3 getPos() { return Position; }
 
 private:
 	void updateCameraVectors();

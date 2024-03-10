@@ -1,6 +1,9 @@
 #ifndef __QGE_MATH_H__
 #define __QGE_MATH_H__
 
+#include <iostream>
+#include <stdlib.h>
+
 bool isPowerOf2(int x) {
     return (x & (x - 1));
 }

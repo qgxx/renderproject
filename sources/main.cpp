@@ -55,6 +55,8 @@ GLboolean shadows = true;
 GLuint woodTexture;
 GLuint planeVAO;
 
+int gShowPoints;
+
 int main() {
     #ifdef _WIN32
     _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG );
@@ -116,6 +118,7 @@ int main() {
     Tiles.push_back({"..\\asserts\\images\\tile2.jpg", "tile2"});
     Tiles.push_back({"..\\asserts\\images\\tile3.png", "tile3"});
     Tiles.push_back({"..\\asserts\\images\\tile4.png", "tile4"});
+    terrain.setMinMAxHeight(0.0f, 256.0f);
     terrain.loadTiles(Tiles);
 
     while (!glfwWindowShouldClose(window)) {
@@ -155,8 +158,7 @@ int main() {
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
-        terrain.setMinMAxHeight(0.0f, 256.0f);
-        terrain.Draw(terrainShader);
+        terrain.Draw(terrainShader, camera.getPos());
 
         if (m_showImgui) {
             ImGui_ImplOpenGL3_NewFrame();
@@ -182,7 +184,7 @@ int main() {
                 terrain.destroy();
                 int Size = 513;
                 float MinHeight = 0.0f;
-                terrain.CreateMidpointDisplacement(Size, Roughness, MinHeight, maxHeight);
+                terrain.CreateMidpointDisplacement(Size, 33, Roughness, MinHeight, maxHeight);
             }
             if (ImGui::Button("Save")) {
                 terrain.saveHeightMap("..\\asserts\\others\\heightmap.save");
@@ -215,9 +217,9 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         camera.ProcessKeyboard(BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(cLEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(cRIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)

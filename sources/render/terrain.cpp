@@ -13,7 +13,7 @@ Terrain::Terrain(float WorldScale, const char* path) {
     mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
 }
 
-void Terrain::Draw(Shader& shader) {
+void Terrain::Draw(Shader& shader, glm::vec3 CameraPos) {
     shader.use();
     shader.setFloat("gMinHeight", mMinH);
     shader.setFloat("gMaxHeight", mMaxH);
@@ -24,7 +24,7 @@ void Terrain::Draw(Shader& shader) {
         glBindTexture(GL_TEXTURE_2D, Tiles[i].id);
     }
     // mTriangleList.Draw(shader);
-    mGeoMipGrid.Draw();
+    mGeoMipGrid.Draw(CameraPos);
 }
 
 void Terrain::LoadHightMap(const char* path) {
@@ -107,6 +107,19 @@ void Terrain::CreateMidpointDisplacement(int Size, float Roughness, float MinHei
     mHeightMap.set_all(Size, Size, 0.0f);
     CreateMidpointDisplacementF32(Roughness);
     mHeightMap.normalize(MinHeight, MaxHeight);
+    mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
+}
+
+void Terrain::CreateMidpointDisplacement(int Size, int PatchSize, float Roughness, float MinHeight, float MaxHeight) {
+    if (Roughness < 0.0f) exit(0);
+    mTerrainSize = Size;
+    mPatchSize = PatchSize;
+    setMinMAxHeight(MinHeight, MaxHeight);
+    mHeightMap.set_all(Size, Size, 0.0f);
+    CreateMidpointDisplacementF32(Roughness);
+    mHeightMap.normalize(MinHeight, MaxHeight);
+    for (int i = 0; i < Size; i++) 
+        mHeightMap[0][i] = mHeightMap[Size - 1][i] = mHeightMap[i][0] = mHeightMap[i][Size - 1] = MinHeight;
     // mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
     mGeoMipGrid.Create(mTerrainSize, mTerrainSize, mPatchSize, this);
 }

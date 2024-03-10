@@ -24,8 +24,8 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
 	float velocity = MovementSpeed * deltaTime;
 	if (direction == FORWARD) Position += Front * velocity;
 	if (direction == BACKWARD) Position -= Front * velocity;
-	if (direction == LEFT) Position -= Right * velocity;
-	if (direction == RIGHT) Position += Right * velocity;
+	if (direction == cLEFT) Position -= Right * velocity;
+	if (direction == cRIGHT) Position += Right * velocity;
 	if (direction == UP) Position += Up * velocity;
 	if (direction == DOWN) Position -= Up * velocity;
 }
