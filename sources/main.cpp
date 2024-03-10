@@ -18,6 +18,8 @@
 #include <crtdbg.h>
 #endif
 #include <chrono>
+#include <Jolt/Jolt.h>
+#include <gtest/gtest.h>
 
 #include "render/shader.h"
 #include "render/camera.h"

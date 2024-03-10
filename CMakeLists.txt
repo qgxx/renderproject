@@ -12,6 +12,7 @@ include(sources/message/CMakeLists.txt.message)
 include_directories(depends)
 include_directories(depends/Assimp/include)
 include_directories(depends/googletest-distribution/include)
+include_directories(depends/JoltPhysics/include)
 include_directories(sources)
 
 add_executable(TinyQGameEngine sources/main.cpp ${glfw_sources} ${imgui_sources} ${render_sources} ${message_sources})
@@ -24,3 +25,4 @@ target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/googletes
 ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgtest_main.a 
 ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgmock.a 
 ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgmock_main.a)
+target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/JoltPhysics/lib/libJolt.a)
