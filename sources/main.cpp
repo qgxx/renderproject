@@ -104,7 +104,7 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    Shader ourShader("..\\asserts\\shaders\\model_loading.vert", "..\\asserts\\shaders\\model_loading.frag");
+    Shader ourShader("..\\asserts\\shaders\\model_loading.vs", "..\\asserts\\shaders\\model_loading.fs");
     Model ourModel("..\\asserts\\models\\Bianka\\Bianka.pmx");
 
     SkyBox skybox("..\\asserts\\images\\skybox");
@@ -156,7 +156,7 @@ int main() {
         projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
         terrainShader.setMat4("projection", projection);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-100.0f, -300.0f, 100.0f)); 
+        model = glm::translate(model, glm::vec3(-200.0f, -300.0f, 100.0f)); 
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);

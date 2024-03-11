@@ -7,4 +7,5 @@ ${render_dir}/skybox.cpp
 ${render_dir}/terrain.cpp 
 ${render_dir}/terrain_trianglelist.cpp 
 ${render_dir}/geomip_grid.cpp 
-${render_dir}/lod_manager.cpp)
+${render_dir}/lod_manager.cpp 
+${render_dir}/lighting.cpp)

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdlib.h>
 
+#define powi(base,exp) (int)powf((float)(base), (float)(exp))
+
 bool isPowerOf2(int x) {
     return (x & (x - 1));
 }

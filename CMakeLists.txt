@@ -18,11 +18,14 @@ include_directories(sources)
 add_executable(TinyQGameEngine sources/main.cpp ${glfw_sources} ${imgui_sources} ${render_sources} ${message_sources})
 
 # copy dll to build directory
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+file(COPY ./depends/Assimp/bin/libassimp-5.dll DESTINATION ./x64/Debug)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 file(COPY ${PROJECT_BINARY_DIR}/../depends/Assimp/bin/libassimp-5.dll DESTINATION ${PROJECT_BINARY_DIR}/)
-
 target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/Assimp/bin/libassimp-5.dll)
 target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgtest.a 
 ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgtest_main.a 
 ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgmock.a 
 ${PROJECT_BINARY_DIR}/../depends/googletest-distribution/lib/libgmock_main.a)
 target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/JoltPhysics/lib/libJolt.a)
+endif()

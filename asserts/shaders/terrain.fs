@@ -5,6 +5,7 @@ layout(location = 0) out vec4 FragColor;
 in vec4 Color;
 in vec2 Tex;
 in vec3 Pos;
+in vec3 Normal;
 
 uniform sampler2D gTextureHeight0;
 uniform sampler2D gTextureHeight1;
@@ -14,7 +15,7 @@ uniform sampler2D gTextureHeight3;
 uniform float gHeight0 = 64.0;
 uniform float gHeight1 = 128.0;
 uniform float gHeight2 = 193.0;
-uniform float gHeight3 = 256.0; 
+uniform float gHeight3 = 256.0;
 
 vec4 CalcTexColor() {
    vec4 TexColor;
