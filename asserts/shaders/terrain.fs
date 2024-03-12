@@ -17,7 +17,7 @@ uniform float gHeight1 = 128.0;
 uniform float gHeight2 = 193.0;
 uniform float gHeight3 = 256.0;
 
-// uniform vec3 gReversedLightDir;
+uniform vec3 gReversedLightDir;
 
 vec4 CalcTexColor() {
    vec4 TexColor;
@@ -51,6 +51,8 @@ vec4 CalcTexColor() {
 }
 
 void main() {
+   vec3 normal = normalize(Normal);
+   float diffuse = max(dot(normal, normalize(gReversedLightDir)), 0.5);
    vec4 TexColor = CalcTexColor();
-   FragColor = Color * TexColor;
+   FragColor = Color * TexColor * diffuse;
 }

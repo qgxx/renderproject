@@ -100,7 +100,8 @@ void GeoMipGrid::CalcNormals(std::vector<Vertex>& Vertices, std::vector<unsigned
         for (int x = 0 ; x < mWidth - 1; x += (mPatchSize - 1)) {
             int BaseVertex = z * mWidth + x;
             //printf("Base index %d\n", BaseVertex);
-    		for (unsigned int i = 0 ; i < Indices.size() ; i += 3) {
+            int numIndices = mLodInfo[0].info[0][0][0][0].count;
+    		for (unsigned int i = 0 ; i < numIndices; i += 3) {
                 unsigned int Index0 = BaseVertex + Indices[i];
                 unsigned int Index1 = BaseVertex + Indices[i + 1];
                 unsigned int Index2 = BaseVertex + Indices[i + 2];

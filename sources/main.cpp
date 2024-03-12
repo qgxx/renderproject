@@ -108,7 +108,7 @@ int main() {
     Model ourModel("..\\asserts\\models\\Bianka\\Bianka.pmx");
 
     SkyBox skybox("..\\asserts\\images\\skybox");
-    Shader skyboxShader("..\\asserts\\shaders\\skybox.vert", "..\\asserts\\shaders\\skybox.frag");
+    Shader skyboxShader("..\\asserts\\shaders\\skybox.vs", "..\\asserts\\shaders\\skybox.fs");
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
@@ -124,6 +124,7 @@ int main() {
     Tiles.push_back({"..\\asserts\\images\\tile4.png", "tile4"});
     terrain.setMinMAxHeight(0.0f, 256.0f);
     terrain.loadTiles(Tiles);
+    Shader terrainNormal("..\\asserts\\shaders\\tn.vs", "..\\asserts\\shaders\\tn.fs", "..\\asserts\\shaders\\tn.gs");
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -159,10 +160,20 @@ int main() {
         terrainShader.setMat4("projection", projection);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-200.0f, -300.0f, 100.0f)); 
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
+        static float foo = 0.0f;
+        foo += 0.002f;
+        float y = min(-0.4f, cosf(foo));
+        glm::vec3 LightDir(sinf(foo * 5.0f), -y, cosf(foo * 5.0f));
+        terrainShader.setVec3("gReversedLightDir", LightDir);
         terrain.Draw(terrainShader, camera.getPos());
+        terrainNormal.use();
+        terrainNormal.setMat4("model", model);
+        terrainNormal.setMat4("view", view);
+        terrainNormal.setMat4("projection", projection);
+        // terrain.Draw(terrainNormal, camera.getPos());
 
         if (m_showImgui) {
             ImGui_ImplOpenGL3_NewFrame();
