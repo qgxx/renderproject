@@ -105,7 +105,7 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 330");
 
     Shader ourShader("..\\asserts\\shaders\\model_loading.vs", "..\\asserts\\shaders\\model_loading.fs");
-    Model ourModel("..\\asserts\\models\\Bianka\\Bianka.pmx");
+    Model ourModel("..\\asserts\\models\\Kiana\\Kiana.pmx");
 
     SkyBox skybox("..\\asserts\\images\\skybox");
     Shader skyboxShader("..\\asserts\\shaders\\skybox.vs", "..\\asserts\\shaders\\skybox.fs");
@@ -125,6 +125,9 @@ int main() {
     terrain.setMinMAxHeight(0.0f, 256.0f);
     terrain.loadTiles(Tiles);
     Shader terrainNormal("..\\asserts\\shaders\\tn.vs", "..\\asserts\\shaders\\tn.fs", "..\\asserts\\shaders\\tn.gs");
+
+    printf("Camera: %f %f %f\n", camera.getPos()[0], camera.getPos()[2]);
+    printf("Terrain: %f %f\n", terrain.getCenterPos()[0], terrain.getCenterPos()[1]);
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -156,24 +159,23 @@ int main() {
         terrainShader.use();
         view = camera.GetViewMatrix();
         terrainShader.setMat4("view", view);
-        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
+        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 5000.0f);
         terrainShader.setMat4("projection", projection);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-200.0f, -300.0f, 100.0f)); 
+        model = glm::translate(model, glm::vec3(-256.0f, -300.0f, -256.0f)); 
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
         static float foo = 0.0f;
         foo += 0.002f;
         float y = min(-0.4f, cosf(foo));
         glm::vec3 LightDir(sinf(foo * 5.0f), -y, cosf(foo * 5.0f));
-        terrainShader.setVec3("gReversedLightDir", LightDir);
-        terrain.Draw(terrainShader, camera.getPos());
+        // terrainShader.setVec3("gReversedLightDir", LightDir);
+        terrain.Draw(terrainShader, camera.getPos() + glm::vec3(256.0f, 300.0f, 256.0f));  // Terrain'Local Space
         terrainNormal.use();
-        terrainNormal.setMat4("model", model);
+        terrainNormal.setMat4("model", model);  
         terrainNormal.setMat4("view", view);
         terrainNormal.setMat4("projection", projection);
-        // terrain.Draw(terrainNormal, camera.getPos());
+        // terrain.Draw(terrainNormal, camera.getPos() + glm::vec3(256.0f, 300.0f, 256.0f));
 
         if (m_showImgui) {
             ImGui_ImplOpenGL3_NewFrame();

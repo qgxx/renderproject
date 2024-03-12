@@ -23,5 +23,6 @@ void main() {
     float HeightRatio = (Position.y - gMinHeight) / DeltaHeight;
     float c = HeightRatio * 0.8 + 0.2;
     Color = vec4(c, c, c, 1.0);
-    Normal = mat3(transpose(inverse(model))) * aNormal;;
+    mat3 normalMatrix = mat3(transpose(inverse(view * model)));
+    Normal =  normalize(vec3(vec4(normalMatrix * aNormal, 0.0)));;
 }

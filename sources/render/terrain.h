@@ -33,7 +33,7 @@ public:
         mGeoMipGrid.Create(513, 513, 33, this);
     }
     ~Terrain() = default;
-    void Draw(Shader& shader, glm::vec3 CameraPos);
+    void Draw(Shader& shader, const glm::vec3 CameraPos);
     void destroy() {
         mHeightMap.destroy();
         // mTriangleList.destroy();
@@ -50,6 +50,7 @@ public:
     void setMinMAxHeight(float minH, float maxH) { mMinH = minH; mMaxH = maxH; }
     void loadTiles(const vector<pair<string, string>>& paths);
     void saveHeightMap(const char* path);
+    glm::vec2 getCenterPos() { return mGeoMipGrid.getCenterPos(); }
 
 private:
     float mWorldScale = 1.0f;

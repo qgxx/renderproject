@@ -13,7 +13,7 @@ Terrain::Terrain(float WorldScale, const char* path) {
     mTriangleList.CreateTriangleList(mTerrainSize, mTerrainSize, this);
 }
 
-void Terrain::Draw(Shader& shader, glm::vec3 CameraPos) {
+void Terrain::Draw(Shader& shader, const glm::vec3 CameraPos) {
     shader.use();
     shader.setFloat("gMinHeight", mMinH);
     shader.setFloat("gMaxHeight", mMaxH);
