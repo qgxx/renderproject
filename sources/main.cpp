@@ -115,6 +115,8 @@ int main() {
     Terrain terrain(2.0f, 33);
     terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
+    terrainShader.use();
+    terrainShader.setVec3("gReversedLightDir", glm::vec3(0.0f, 1.0f, 0.0f));
     vector<pair<string, string>> Tiles;
     Tiles.push_back({"..\\asserts\\images\\tile1.jpg", "tile1"});
     Tiles.push_back({"..\\asserts\\images\\tile2.jpg", "tile2"});
@@ -157,7 +159,7 @@ int main() {
         terrainShader.setMat4("projection", projection);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-200.0f, -300.0f, 100.0f)); 
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         terrainShader.setMat4("model", model);
         terrain.Draw(terrainShader, camera.getPos());

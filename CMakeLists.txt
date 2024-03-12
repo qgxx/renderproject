@@ -19,7 +19,9 @@ add_executable(TinyQGameEngine sources/main.cpp ${glfw_sources} ${imgui_sources}
 
 # copy dll to build directory
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-file(COPY ./depends/Assimp/bin/libassimp-5.dll DESTINATION ./x64/Debug)
+file(COPY ./depends/Assimp/bin/libassimp-5.dll DESTINATION ./Debug)
+file(COPY ./asserts DESTINATION ./)
+target_link_libraries(TinyQGameEngine ${PROJECT_SOURCE_DIR}/depends/Assimp/lib/assimp-vc143-mt.lib)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 file(COPY ${PROJECT_BINARY_DIR}/../depends/Assimp/bin/libassimp-5.dll DESTINATION ${PROJECT_BINARY_DIR}/)
 target_link_libraries(TinyQGameEngine ${PROJECT_BINARY_DIR}/../depends/Assimp/bin/libassimp-5.dll)

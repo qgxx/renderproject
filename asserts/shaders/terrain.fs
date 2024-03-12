@@ -17,6 +17,8 @@ uniform float gHeight1 = 128.0;
 uniform float gHeight2 = 193.0;
 uniform float gHeight3 = 256.0;
 
+// uniform vec3 gReversedLightDir;
+
 vec4 CalcTexColor() {
    vec4 TexColor;
    float Height = Pos.y;
@@ -49,5 +51,6 @@ vec4 CalcTexColor() {
 }
 
 void main() {
-   FragColor = Color * CalcTexColor();
+   vec4 TexColor = CalcTexColor();
+   FragColor = Color * TexColor;
 }
