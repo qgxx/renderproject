@@ -17,18 +17,17 @@
 #include <map>
 #include <vector>
 
-using namespace std;
 
 class Model {
 public:
 	// model data
-	vector<Texture> textures_loaded;
-	vector<Mesh> meshes;
-	string directory;
+	std::vector<Texture> textures_loaded;
+	std::vector<Mesh> meshes;
+	std::string directory;
 	bool gammaCorrection;
 
 	Model() {};
-	Model(string const& path, bool gamma = false) : gammaCorrection(gamma) {
+	Model(std::string const& path, bool gamma = false) : gammaCorrection(gamma) {
 		loadModel(path);
 	}
 	void Draw(Shader& shader) {
@@ -36,12 +35,12 @@ public:
 	}
 
 private:
-	void loadModel(string const &path);
+	void loadModel(std::string const &path);
 	void processNode(aiNode *node, const aiScene *scene);
 	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
+	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 };
 
-unsigned int TextureFromFile(const char* path, const string& directory);
+unsigned int TextureFromFile(const char* path, const std::string& directory);
 
 #endif // !__MODEL_H__

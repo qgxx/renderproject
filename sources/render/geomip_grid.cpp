@@ -44,7 +44,7 @@ void GeoMipGrid::Create(int w, int d, int PatchSize, const Terrain* pterrain) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     m_Terrain = pterrain;
-    WorldScale = m_Terrain->GetWorldScale();
+    mWorldScale = m_Terrain->GetWorldScale();
 }
 
 void GeoMipGrid::setupGrid(const Terrain* pTerrain) {
@@ -317,38 +317,4 @@ int GeoMipGrid::CalcNumIndices() {
     }
     printf("Initial number of indices %d\n", NumIndices);
     return NumIndices;
-}
-
-bool GeoMipGrid::IsPatchInsideViewFrustum_WorldSpace(int X, int Z, const FrustumCulling& fc) {
-    int x0 = X;
-    int x1 = X + mPatchSize - 1;
-    int z0 = Z;
-    int z1 = Z + mPatchSize - 1;
-
-    float h00 = m_Terrain->GetHeight(x0, z0);
-    float h01 = m_Terrain->GetHeight(x0, z1);
-    float h10 = m_Terrain->GetHeight(x1, z0);
-    float h11 = m_Terrain->GetHeight(x1, z1);
-
-    float MinHeight = std::min(h00, std::min(h01, std::min(h10, h11)));
-    float MaxHeight = std::max(h00, std::max(h01, std::max(h10, h11)));
-
-    glm::vec3 p00_low((float)x0 * mWorldScale, MinHeight, (float)z0 * mWorldScale);
-    glm::vec3 p01_low((float)x0 * mWorldScale, MinHeight, (float)z1 * mWorldScale);
-    glm::vec3 p10_low((float)x1 * mWorldScale, MinHeight, (float)z0 * mWorldScale);
-    glm::vec3 p11_low((float)x1 * mWorldScale, MinHeight, (float)z1 * mWorldScale);
-    glm::vec3 p00_high((float)x0 * mWorldScale, MaxHeight, (float)z0 * mWorldScale);
-    glm::vec3 p01_high((float)x0 * mWorldScale, MaxHeight, (float)z1 * mWorldScale);
-    glm::vec3 p10_high((float)x1 * mWorldScale, MaxHeight, (float)z0 * mWorldScale);
-    glm::vec3 p11_high((float)x1 * mWorldScale, MaxHeight, (float)z1 * mWorldScale);
-
-    bool InsideViewFrustm = fc.IsPointInsideViewFrustum(p00_low) ||
-        fc.IsPointInsideViewFrustum(p01_low) ||
-        fc.IsPointInsideViewFrustum(p10_low) ||
-        fc.IsPointInsideViewFrustum(p11_low) ||
-        fc.IsPointInsideViewFrustum(p00_high) ||
-        fc.IsPointInsideViewFrustum(p01_high) ||
-        fc.IsPointInsideViewFrustum(p10_high) ||
-        fc.IsPointInsideViewFrustum(p11_high);
-    return InsideViewFrustm;
 }

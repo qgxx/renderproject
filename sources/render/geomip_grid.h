@@ -9,8 +9,6 @@
 #include "lod_manager.h"
 #include "core/qgemath.h"
 
-using namespace std;
-
 class Terrain;
 
 class GeoMipGrid {
@@ -46,7 +44,6 @@ private:
     unsigned int CreateTriangleFan(int Index, std::vector<unsigned int>& Indices, 
             int lodCore, int lodLeft, int lodRight, int lodTop, int lodBottom, int x, int z);
     int CalcNumIndices();
-    bool IsPatchInsideViewFrustum_WorldSpace(int X, int Z, const FrustumCulling& fc);
 
     int mWidth = 0;
     int mDepth = 0;
@@ -67,7 +64,7 @@ private:
     typedef struct LodInfo {
         SingleLodInfo info[LEFT][RIGHT][TOP][BOTTOM];
     } LodInfo;
-    vector<LodInfo> mLodInfo;
+    std::vector<LodInfo> mLodInfo;
     int mNumPatchesX = 0;
     int mNumPatchesZ = 0;
 

@@ -8,14 +8,17 @@ include(CMakeLists.txt.glfw)
 include(CMakeLists.txt.imgui)
 include(sources/render/CMakeLists.txt.render)
 include(sources/message/CMakeLists.txt.message)
+include(sources/core/CMakeLists.txt.core)
 
 include_directories(depends)
 include_directories(depends/Assimp/include)
 include_directories(depends/googletest-distribution/include)
 include_directories(depends/JoltPhysics/include)
+include_directories(depends/OpenGL)
 include_directories(sources)
 
-add_executable(TinyQGameEngine sources/main.cpp ${glfw_sources} ${imgui_sources} ${render_sources} ${message_sources})
+add_executable(TinyQGameEngine sources/main.cpp ${glfw_sources} ${imgui_sources} ${render_sources} ${message_sources} ${core_sources} 
+depends/OpenGL/glextensions.cpp)
 
 # copy dll to build directory
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

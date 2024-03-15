@@ -6,9 +6,7 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
-static vector<float> skyboxVertexs = {     
+static std::vector<float> skyboxVertexs = {     
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
     1.0f, -1.0f, -1.0f,
@@ -62,7 +60,7 @@ private:
     unsigned int VAO, VBO;
     unsigned int cubemapTexture;
     std::vector<float> vertexs;
-    string directory;
+    std::string directory;
 
     void setupSkyBox();
     unsigned int loadCubemap();

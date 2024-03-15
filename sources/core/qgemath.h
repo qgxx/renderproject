@@ -7,6 +7,9 @@
 
 #define powi(base,exp) (int)powf((float)(base), (float)(exp))
 
+static const float TWO_PI = 6.283185f;
+static const float ONE_OVER_SQRT_2 = 0.7071067f;
+
 inline bool isPowerOf2(int x) {
     return (x & (x - 1));
 }
@@ -33,48 +36,44 @@ inline float RandomFloatRange(float Start, float End) {
     return RandomValue;
 }
 
-class FrustumCulling {
-public:
-    FrustumCulling(const glm::mat4& ViewProj)
-    {
-        Update(ViewProj);
-    }
+struct Complex {
+	float a;
+	float b;
 
-    void Update(const glm::mat4& ViewProj) {
-        glm::vec4 Row1(ViewProj[0][0], ViewProj[0][1], ViewProj[0][2], ViewProj[0][3]);
-        glm::vec4 Row2(ViewProj[1][0], ViewProj[1][1], ViewProj[1][2], ViewProj[1][3]);
-        glm::vec4 Row3(ViewProj[2][0], ViewProj[2][1], ViewProj[2][2], ViewProj[2][3]);
-        glm::vec4 Row4(ViewProj[3][0], ViewProj[3][1], ViewProj[3][2], ViewProj[3][3]);
+	Complex();
+	Complex(float re, float im);
 
-        m_leftClipPlane = Row1 + Row4;
-        m_rightClipPlane = Row1 - Row4;
-        m_bottomClipPlane = Row2 + Row4;
-        m_topClipPlane = Row2 - Row4;
-        m_nearClipPlane = Row3 + Row4;
-        m_farClipPlane = Row3 - Row4;
-    }
+	Complex& operator +=(const Complex& other);
 
-    bool IsPointInsideViewFrustum(const glm::vec3& p) const {
-        glm::vec4 p4D(p, 1.0f);
-
-        bool Inside = (glm::dot(m_leftClipPlane, p4D) >= 0) &&
-            (glm::dot(m_rightClipPlane, p4D) <= 0) /*&&
-            (glm::dot(m_nearClipPlane, p4D) >= 0) &&
-            (glm::dot(m_farClipPlane, p4D) <= 0) && 
-            (glm::dot(m_topClipPlane, p4D) <= 0) &&
-            (glm::dot(m_bottomClipPlane, p4D) >= 0)*/;
-
-        return Inside;
-    }
-
-private:
-    glm::vec4 m_leftClipPlane;
-    glm::vec4 m_rightClipPlane;
-    glm::vec4 m_bottomClipPlane;
-    glm::vec4 m_topClipPlane;
-    glm::vec4 m_nearClipPlane;
-    glm::vec4 m_farClipPlane;
-
+	inline Complex operator +(const Complex& other)	{ return Complex(a + other.a, b + other.b); }
+	inline Complex operator -(const Complex& other)	{ return Complex(a - other.a, b - other.b); }
+	inline Complex operator *(const Complex& other)	{ return Complex(a * other.a - b * other.b, b * other.a + a * other.b); }
 };
+
+struct Vector2
+{
+	float x, y;
+
+	Vector2();
+	Vector2(const Vector2& other);
+	Vector2(float _x, float _y);
+	Vector2(const float* values);
+
+	Vector2 operator +(const Vector2& v) const;
+	Vector2 operator -(const Vector2& v) const;
+	Vector2 operator *(float s) const;
+
+	Vector2& operator =(const Vector2& other);
+
+	inline operator float*()					{ return &x; }
+	inline operator const float*() const		{ return &x; }
+
+	inline float& operator [](int index)		{ return *(&x + index); }
+	inline float operator [](int index) const	{ return *(&x + index); }
+};
+
+void Vec2Normalize(Vector2& out, const Vector2& v);
+float Vec2Length(const Vector2& v);
+float Vec2Dot(const Vector2& a, const Vector2& b);
 
 #endif // !__QGE_MATH_H__

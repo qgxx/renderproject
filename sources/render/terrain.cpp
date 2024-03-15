@@ -17,10 +17,10 @@ void Terrain::Draw(Shader& shader, const glm::vec3 CameraPos) {
     shader.use();
     shader.setFloat("gMinHeight", mMinH);
     shader.setFloat("gMaxHeight", mMaxH);
-    string name = "gTextureHeight";
+    std::string name = "gTextureHeight";
     for (int i = 0; i < Tiles.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
-        shader.setInt((name + to_string(i)).c_str(), i);
+        shader.setInt((name + std::to_string(i)).c_str(), i);
         glBindTexture(GL_TEXTURE_2D, Tiles[i].id);
     }
     // mTriangleList.Draw(shader);
@@ -89,7 +89,7 @@ void WriteBinaryFile(const char* path, const void* data, size_t& size) {
     FILE* f = NULL;
     errno_t err = fopen_s(&f, path, "wb"); 
     if (!f) {
-        QGERROR(string("Error opening '%s'\n") + path);
+        QGERROR((std::string("Error opening '%s'\n") + path).c_str());
         exit(0);
     }
     size_t bytes_written = fwrite(data, 1, size, f);
@@ -208,12 +208,12 @@ void Terrain::squareStep(int RectSize, float CurHeight) {
     }
 }
 
-void Terrain::loadTiles(const vector<pair<string, string>>& paths) {
+void Terrain::loadTiles(const std::vector<std::pair<std::string, std::string>>& paths) {
     for (int i = 0; i < paths.size(); i++) 
         Tiles.push_back({TextureFromFile(paths[i].first), paths[i].second});
 }
 
-unsigned int TextureFromFile(const string& path) {
+unsigned int TextureFromFile(const std::string& path) {
     unsigned int textureID;
 	glGenTextures(1, &textureID);
 

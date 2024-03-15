@@ -16,11 +16,9 @@
 #include "terrain_trianglelist.h"
 #include "geomip_grid.h"
 
-using namespace std;
-
 typedef struct Tile {
     unsigned int id;
-    string type;
+    std::string type;
 } Tile;
 
 class Terrain {
@@ -48,7 +46,7 @@ public:
     void CreateMidpointDisplacement(int Size, float Roughness, float MinHeight, float MaxHeight);
     void CreateMidpointDisplacement(int Size, int PatchSize, float Roughness, float MinHeight, float MaxHeight);
     void setMinMAxHeight(float minH, float maxH) { mMinH = minH; mMaxH = maxH; }
-    void loadTiles(const vector<pair<string, string>>& paths);
+    void loadTiles(const std::vector<std::pair<std::string, std::string>>& paths);
     void saveHeightMap(const char* path);
     glm::vec2 getCenterPos() { return mGeoMipGrid.getCenterPos(); }
 
@@ -61,7 +59,7 @@ private:
     GeoMipGrid mGeoMipGrid;
     float mMinH, mMaxH;
     int mPatchSize = 0;
-    vector<Tile> Tiles;
+    std::vector<Tile> Tiles;
 
     void LoadHightMap(const char* path);
     void CreateMidpointDisplacementF32(float roughness);
@@ -71,6 +69,6 @@ private:
 
 char* ReadBinaryFile(const char* path, size_t& size);
 void WriteBinaryFile(const char* path, const void* data, size_t& size);
-unsigned int TextureFromFile(const string& path);
+unsigned int TextureFromFile(const std::string& path);
 
 #endif // !__TERRAIN_H__

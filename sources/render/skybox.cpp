@@ -3,7 +3,7 @@
 #include <stb/stb_image.h>
 
 SkyBox::SkyBox(const char* path, std::vector<float>& ver) {
-    directory = string(path);
+    directory = std::string(path);
     cubemapTexture = loadCubemap();
     vertexs = ver;
     setupSkyBox();

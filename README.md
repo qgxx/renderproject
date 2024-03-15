@@ -26,4 +26,4 @@ Shader languages support for VS Code
 OpenGL & basic computer graphics: [LearnOpenGL CN](https://learnopengl-cn.github.io/)  
 OpenGL & basic computer graphics: [LearnOpenGL](https://learnopengl.com/)  
 GameEngine Architecture: [GAMES104](https://games104.boomingtech.com/sc/)  
-Terrain: [OGLDEV](https://www.youtube.com/playlist?list=PLA0dXqQjCx0S9qG5dWLsheiCJV-_eLUM0)
+Ocean & OpenGL extension: Asylum  
