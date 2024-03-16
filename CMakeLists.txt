@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # include(CMakeLists.txt.glfw)
 include(CMakeLists.txt.imgui)
-include(sources/render/CMakeLists.txt.render)
-include(sources/message/CMakeLists.txt.message)
+include(sources/function/render/CMakeLists.txt.render)
+include(sources/core/message/CMakeLists.txt.message)
 include(sources/core/CMakeLists.txt.core)
 
 include_directories(depends)

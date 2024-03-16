@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "shader.h"
-#include "../core/qgearray.h"
+#include "core/qgearray.h"
 #include "terrain_trianglelist.h"
 #include "geomip_grid.h"
 

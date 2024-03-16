@@ -1,4 +1,4 @@
-set(render_dir sources/render)
+set(render_dir sources/function/render)
 set(render_sources ${render_dir}/shader.cpp 
 ${render_dir}/mesh.cpp 
 ${render_dir}/model.cpp 

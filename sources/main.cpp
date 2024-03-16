@@ -21,11 +21,11 @@
 #include <Jolt/Jolt.h>
 #include <gtest/gtest.h>
 
-#include "render/shader.h"
-#include "render/camera.h"
-#include "render/model.h"
-#include "render/skybox.h"
-#include "render/terrain.h"
+#include "function/render/shader.h"
+#include "function/render/camera.h"
+#include "function/render/model.h"
+#include "function/render/skybox.h"
+#include "function/render/terrain.h"
 #include "core/qgetime.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

@@ -1,5 +1,5 @@
 #include "terrain.h"
-#include "../core/qgemath.h"
+#include "core/qgemath.h"
 #include <stb/stb_image.h>
 
 #define QGERROR(msg)\
