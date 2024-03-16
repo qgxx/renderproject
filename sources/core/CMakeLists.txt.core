@@ -1,2 +1,3 @@
 set(core_dir sources/core)
-set(core_sources ${core_dir}/application.cpp ${core_dir}/qgemath.cpp) 
+set(core_sources ${core_dir}/application.cpp 
+${core_dir}/qgemath.cpp) 

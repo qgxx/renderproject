@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <glm/glm.hpp>
-#include <glad/gl.h>
+#include <glad/glad.h>
 
 #include "lod_manager.h"
 #include "core/qgemath.h"

@@ -1,4 +1,4 @@
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -26,7 +26,6 @@
 #include "render/model.h"
 #include "render/skybox.h"
 #include "render/terrain.h"
-#include "render/ocean.h"
 #include "core/qgetime.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -87,7 +86,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
 
-    if (!gladLoadGL(glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }

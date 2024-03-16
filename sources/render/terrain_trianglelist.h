@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <glm/glm.hpp>
-#include <glad/gl.h>
+#include <glad/glad.h>
 
 #include "shader.h"
 
