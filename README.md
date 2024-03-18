@@ -1,12 +1,12 @@
 # Environment
 CMAKE 3.17+  
-ninja 1.11+    
+ninja 1.11+     
 MinGW w64devkit-1.20.0(gcc 13.2+) / VS2022    
 make 4.4  
-OpenGL3.3+  
+OpenGL 4.6    
 
 ## depends
-glfw  
+glfw 3.8    
 glad  
 glm  
 stb  

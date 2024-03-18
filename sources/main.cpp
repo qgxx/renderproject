@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <GL/glext.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,6 +7,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_WINDOWS_UTF8
 #include <stb/stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
 #include <iostream>
 #include <string>
 #include <stdlib.h>
@@ -26,6 +29,7 @@
 #include "function/render/model.h"
 #include "function/render/skybox.h"
 #include "function/render/terrain.h"
+#include "function/render/ocean/ocean.h"
 #include "core/qgetime.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -60,6 +64,8 @@ GLuint planeVAO;
 
 int gShowPoints;
 
+GLint maxanisotropy;
+
 int main() {
     #ifdef _WIN32
     _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG );
@@ -68,7 +74,7 @@ int main() {
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -95,6 +101,11 @@ int main() {
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);  
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+    maxanisotropy = 1;
+    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxanisotropy);
+    maxanisotropy = std::max(maxanisotropy, 2);
+
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     IMGUI_CHECKVERSION();
@@ -107,6 +118,11 @@ int main() {
     Shader ourShader("..\\asserts\\shaders\\model_loading.vs", "..\\asserts\\shaders\\model_loading.fs");
     Model ourModel("..\\asserts\\models\\Elysia_maid\\Elysia.pmx");
 
+    Ocean ocean;
+    ocean.Init();
+    ocean.Render();
+    
+    #if 0
     SkyBox skybox("..\\asserts\\images\\skybox");
     Shader skyboxShader("..\\asserts\\shaders\\skybox.vs", "..\\asserts\\shaders\\skybox.fs");
     skyboxShader.use();
@@ -129,6 +145,7 @@ int main() {
     printf("Camera: %f %f\n", camera.getPos()[0], camera.getPos()[2]);
     printf("Terrain: %f %f\n", terrain.getCenterPos()[0], terrain.getCenterPos()[1]);
     printf("Terrain's WorldScale: %f\n", terrain.GetWorldScale());
+    #endif
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -136,7 +153,7 @@ int main() {
         lastFrame = currentFrame;
         processInput(window);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ourShader.use();
@@ -150,6 +167,7 @@ int main() {
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
+        #if 0
         glDepthFunc(GL_LEQUAL);  
         skyboxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); 
@@ -215,10 +233,18 @@ int main() {
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
+        #endif 
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    #if 0
+    // avoid affecting the pipeline
+    unsigned char* out = new unsigned char[DISP_MAP_SIZE * DISP_MAP_SIZE * 4];
+    glBindTexture(GL_TEXTURE_2D, ocean.getDisplacementID());
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, out);
+    stbi_write_png("ocean-displacement-map.png", DISP_MAP_SIZE, DISP_MAP_SIZE, 4, out, 0);
+    #endif
 
     glfwTerminate();
     return 0;

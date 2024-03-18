@@ -1,31 +1,54 @@
-#version 330
+#version 430 core
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec3 aTexCoords;
- 
-uniform mat4 Projection;
-uniform mat4 View;
-uniform mat4 Model;
-uniform vec3 light_position;
- 
-out vec3 light_vector;
-out vec3 normal_vector;
-out vec3 halfway_vector;
-out float fog_factor;
-out vec2 tex_coord;
- 
-void main() {
-    gl_Position = View * Model * vec4(aPos, 1.0);
-    fog_factor = min(-gl_Position.z/500.0, 1.0);
-    gl_Position = Projection * gl_Position;
- 
-    vec4 v = View * Model * vec4(aPos, 1.0);
-    vec3 normal1 = normalize(aNormal);
- 
-    light_vector = normalize((View * vec4(light_position, 1.0)).xyz - v.xyz);
-    normal_vector = (inverse(transpose(View * Model)) * vec4(normal1, 0.0)).xyz;
-    halfway_vector = light_vector + normalize(-v.xyz);
- 
-    tex_coord = aTexCoords.xy;
+// NOTE: also defined in fragment shader
+#define BLEND_START		8		// m
+#define BLEND_END		200		// m
+
+in vec3 my_Position;
+
+layout (binding = 0) uniform sampler2D displacement;
+layout (binding = 1) uniform sampler2D perlin;
+
+uniform mat4 matLocal;
+uniform mat4 matWorld;
+uniform mat4 matViewProj;
+uniform vec4 uvParams;
+uniform vec2 perlinOffset;
+uniform vec3 eyePos;
+
+out vec3 vdir;
+out vec2 tex;
+
+void main()
+{
+	// NOTE: also defined in fragment shader
+	const vec3 perlinFrequency	= vec3(1.12, 0.59, 0.23);
+	const vec3 perlinAmplitude	= vec3(0.35, 0.42, 0.57);
+
+	// transform to world space
+	vec4 pos_local = matLocal * vec4(my_Position, 1.0);
+	vec2 uv_local = pos_local.xy * uvParams.x + vec2(uvParams.y);
+	vec3 disp = texture(displacement, uv_local).xyz;
+
+	pos_local = matWorld * pos_local;
+	vdir = eyePos - pos_local.xyz;
+	tex = uv_local;
+
+	// blend with Perlin waves
+	float dist = length(vdir.xz);
+	float factor = clamp((BLEND_END - dist) / (BLEND_END - BLEND_START), 0.0, 1.0);
+	float perl = 0.0;
+
+	if (factor < 1.0) {
+		vec2 ptex = uv_local + uvParams.zw;
+		
+		float p0 = texture(perlin, ptex * perlinFrequency.x + perlinOffset).a;
+		float p1 = texture(perlin, ptex * perlinFrequency.y + perlinOffset).a;
+		float p2 = texture(perlin, ptex * perlinFrequency.z + perlinOffset).a;
+
+		perl = dot(vec3(p0, p1, p2), perlinAmplitude);
+	}
+
+	disp = mix(vec3(0.0, perl, 0.0), disp, factor);
+	gl_Position = matViewProj * vec4(pos_local.xyz + disp, 1.0);
 }
