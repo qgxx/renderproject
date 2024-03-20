@@ -10,5 +10,5 @@ ${render_dir}/geomip_grid.cpp
 ${render_dir}/lod_manager.cpp 
 ${render_dir}/lighting.cpp 
 ${render_dir}/ocean/ocean.cpp 
-${render_dir}/ocean/qocean.cpp 
+${render_dir}/ocean/quadtree.cpp 
 ${render_dir}/ocean/mesh.cpp)

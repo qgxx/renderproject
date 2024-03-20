@@ -31,6 +31,8 @@
 #include "function/render/terrain.h"
 #include "function/render/ocean/ocean.h"
 #include "core/qgetime.h"
+#include "core/qgetime.h"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -74,7 +76,7 @@ int main() {
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -120,14 +122,13 @@ int main() {
 
     Ocean ocean;
     ocean.Init();
-    ocean.Render();
     
-    #if 0
-    SkyBox skybox("..\\asserts\\images\\skybox");
+    SkyBox skybox("..\\asserts\\images\\ocean_env");
     Shader skyboxShader("..\\asserts\\shaders\\skybox.vs", "..\\asserts\\shaders\\skybox.fs");
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
+    #if 0
     Terrain terrain(2.0f, 33);
     terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
@@ -146,6 +147,16 @@ int main() {
     printf("Terrain: %f %f\n", terrain.getCenterPos()[0], terrain.getCenterPos()[1]);
     printf("Terrain's WorldScale: %f\n", terrain.GetWorldScale());
     #endif
+
+	LARGE_INTEGER	qwTicksPerSec = { 0, 0 };
+	LARGE_INTEGER	qwTime;
+	LONGLONG		tickspersec;
+	double			last, current;
+	double			delta, accum = 0;
+	QueryPerformanceFrequency(&qwTicksPerSec);
+	tickspersec = qwTicksPerSec.QuadPart;
+	QueryPerformanceCounter(&qwTime);
+	last = (qwTime.QuadPart % tickspersec) / (double)tickspersec;
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -167,7 +178,17 @@ int main() {
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
-        #if 0
+        model = glm::mat4(1.0f);
+        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		QueryPerformanceCounter(&qwTime);
+		current = (qwTime.QuadPart % tickspersec) / (double)tickspersec;
+		if (current < last) delta = ((1.0 + current) - last);
+		else delta = (current - last);
+
+		last = current;
+		accum += delta;
+        ocean.Render(model, projection * view, projection, camera.getPos(), (float)delta);
+
         glDepthFunc(GL_LEQUAL);  
         skyboxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); 
@@ -175,6 +196,7 @@ int main() {
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
 
+        #if 0
         terrainShader.use();
         view = camera.GetViewMatrix();
         terrainShader.setMat4("view", view);
@@ -195,6 +217,7 @@ int main() {
         terrainNormal.setMat4("view", view);
         terrainNormal.setMat4("projection", projection);
         // terrain.Draw(terrainNormal, camera.getPos() + glm::vec3(512.0f, 300.0f, 512.0f));
+        #endif 
 
         if (m_showImgui) {
             ImGui_ImplOpenGL3_NewFrame();
@@ -216,6 +239,7 @@ int main() {
             ImGui::SliderFloat("Height2", &Height2, 128.0f, 192.0f);
             ImGui::SliderFloat("Height3", &Height3, 192.0f, 256.0f);
 
+            /*
             if (ImGui::Button("Generate")) {
                 terrain.destroy();
                 int Size = 513;
@@ -224,7 +248,7 @@ int main() {
             }
             if (ImGui::Button("Save")) {
                 terrain.saveHeightMap("..\\asserts\\others\\heightmap.save");
-            }
+            }*/
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 
                 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -233,12 +257,11 @@ int main() {
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
-        #endif 
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    #if 0
+    #if 1
     // avoid affecting the pipeline
     unsigned char* out = new unsigned char[DISP_MAP_SIZE * DISP_MAP_SIZE * 4];
     glBindTexture(GL_TEXTURE_2D, ocean.getDisplacementID());

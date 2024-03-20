@@ -46,12 +46,12 @@ unsigned int SkyBox::loadCubemap() {
     unsigned int TexID;
     glGenTextures(1, &TexID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, TexID);
-    LOAD_FACE((directory + "\\right.jpg").c_str(), 0);
-    LOAD_FACE((directory + "\\left.jpg").c_str(), 1);
-    LOAD_FACE((directory + "\\top.jpg").c_str(), 2);
-    LOAD_FACE((directory + "\\bottom.jpg").c_str(), 3);
-    LOAD_FACE((directory + "\\front.jpg").c_str(), 4);
-    LOAD_FACE((directory + "\\back.jpg").c_str(), 5);
+    LOAD_FACE((directory + "\\right.png").c_str(), 0);
+    LOAD_FACE((directory + "\\left.png").c_str(), 1);
+    LOAD_FACE((directory + "\\top.png").c_str(), 2);
+    LOAD_FACE((directory + "\\bottom.png").c_str(), 3);
+    LOAD_FACE((directory + "\\front.png").c_str(), 4);
+    LOAD_FACE((directory + "\\back.png").c_str(), 5);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

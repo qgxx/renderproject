@@ -2,11 +2,13 @@
 #define __OCEAN_H__
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <complex>
 #include <random>
 #include "../shader.h"
 #include "mesh.h"
 #include "core/qgemath.h"
+#include "quadtree.h"
 
 #define DISP_MAP_SIZE		512					// 1024 max
 #define MESH_SIZE			256					// [64, 256] (or calculate index count for other levels)
@@ -32,41 +34,36 @@ static const int IndexCounts[] = {
 
 class Ocean {
 public:
-    Ocean() {
-        spectrumShader = new Shader("..\\asserts\\shaders\\spectrum.comp");
-        fftShader = new Shader("..\\asserts\\shaders\\fft.comp");
-        displacementShader = new Shader("..\\asserts\\shaders\\displacement.comp");
-    }
+    Ocean() {}
     ~Ocean() {}
     bool Init();
-    void Render();
+    void Render(glm::mat4 world, glm::mat4 viewproj, glm::mat4 proj, glm::vec3 eye, double Elapsed);
     unsigned int getDisplacementID() { return displacement; }
 
 private:
     unsigned int init_spectrum, frequencies, updated[2], tempdata, displacement, gradients;
+    unsigned int perlin_noise, envmap;
     Shader* spectrumShader;
     Shader* fftShader;
     Shader* displacementShader;
+    Shader* gradientShader;
+    Shader* oceanShader;
     oMesh* oceanMesh;
+    QuadTree tree;
 
     uint32_t numlods = 0;
 
-    void FourierTransform(GLuint spectrum) {
-        fftShader->use();
-        fftShader->setInt("readbuff", 0);
-	    fftShader->setInt("writebuff", 1);
-
-        // horizontal pass
-        glBindImageTexture(0, spectrum, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG32F);
-        glBindImageTexture(1, tempdata, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG32F);
-        glDispatchCompute(DISP_MAP_SIZE, 1, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-        // vertical pass
-        glBindImageTexture(0, tempdata, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG32F);
-        glBindImageTexture(1, spectrum, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG32F);
-        glDispatchCompute(DISP_MAP_SIZE, 1, 1);
-    }
+    void FourierTransform(GLuint spectrum);
+    void GenerateLODLevels(OceanAttribute** subsettable, GLuint* numsubsets, uint32_t* idata);
+    GLuint GenerateBoundaryMesh(int deg_left, int deg_top, int deg_right, int deg_bottom, int levelsize, uint32_t* idata);
+    unsigned int TextureFromFile(const char* path);
+    unsigned int loadCubemap(std::string directory);
 };
+
+static GLuint CalcSubsetIndex(int level, int dL, int dR, int dB, int dT)
+{
+	// returns the subset index of the given LOD levels
+	return 2 * (level * 3 * 3 * 3 * 3 + dL * 3 * 3 * 3 + dR * 3 * 3 + dB * 3 + dT);
+}
 
 #endif // !__OCEAN_H__
