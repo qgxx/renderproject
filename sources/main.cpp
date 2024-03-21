@@ -166,6 +166,7 @@ int main() {
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
         ourShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -179,15 +180,14 @@ int main() {
         ourModel.Draw(ourShader);
 
         model = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 2000.0f);
 		QueryPerformanceCounter(&qwTime);
 		current = (qwTime.QuadPart % tickspersec) / (double)tickspersec;
 		if (current < last) delta = ((1.0 + current) - last);
 		else delta = (current - last);
-
 		last = current;
 		accum += delta;
-        ocean.Render(model, projection * view, projection, camera.getPos(), (float)delta);
+        ocean.Render(model, projection, camera, (float)delta);
 
         glDepthFunc(GL_LEQUAL);  
         skyboxShader.use();
@@ -261,7 +261,7 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    #if 1
+    #if 0
     // avoid affecting the pipeline
     unsigned char* out = new unsigned char[DISP_MAP_SIZE * DISP_MAP_SIZE * 4];
     glBindTexture(GL_TEXTURE_2D, ocean.getDisplacementID());

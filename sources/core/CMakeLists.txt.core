@@ -1,3 +1,4 @@
 set(core_dir sources/core)
 set(core_sources ${core_dir}/application.cpp 
-${core_dir}/qgemath.cpp) 
+${core_dir}/qgemath.cpp 
+${core_dir}/algorithm/fft.cpp) 

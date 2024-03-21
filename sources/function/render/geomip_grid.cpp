@@ -158,7 +158,6 @@ void GeoMipGrid::Draw(const glm::vec3 CameraPos) {
                 size_t BaseIndex = sizeof(unsigned int) * mLodInfo[C].info[L][R][T][B].start;
 
                 int BaseVertex = z * mWidth + x;
-                //            printf("%d\n", BaseVertex);
 
                 glDrawElementsBaseVertex(GL_TRIANGLES, mLodInfo[C].info[L][R][T][B].count, 
                                         GL_UNSIGNED_INT, (void*)BaseIndex, BaseVertex);

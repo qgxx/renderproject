@@ -41,7 +41,8 @@ bool Ocean::Init() {
 	int start = DISP_MAP_SIZE / 2;
 
 	// NOTE: in order to be symmetric, this must be (N + 1) x (N + 1) in size
-	Complex* h0data = new Complex[(DISP_MAP_SIZE + 1) * (DISP_MAP_SIZE + 1)];
+	// Complex* h0data = new Complex[(DISP_MAP_SIZE + 1) * (DISP_MAP_SIZE + 1)];
+	std::complex<float>* h0data = new std::complex<float>[(DISP_MAP_SIZE + 1) * (DISP_MAP_SIZE + 1)];
 	float* wdata = new float[(DISP_MAP_SIZE + 1) * (DISP_MAP_SIZE + 1)];
 	{
 		glm::vec2 w = WIND_DIRECTION;
@@ -64,8 +65,8 @@ bool Ocean::Init() {
 				if (k.x != 0.0f || k.y != 0.0f)
 					sqrt_P_h = sqrtf(Phillips(k, wn, V, A));
 
-				h0data[index].a = (float)(sqrt_P_h * gaussian(gen) * ONE_OVER_SQRT_2);
-				h0data[index].b = (float)(sqrt_P_h * gaussian(gen) * ONE_OVER_SQRT_2);
+				h0data[index] = std::complex<float>((float)(sqrt_P_h * gaussian(gen) * ONE_OVER_SQRT_2), 
+													(float)(sqrt_P_h * gaussian(gen) * ONE_OVER_SQRT_2));
 
 				// dispersion relation \omega^2(k) = gk
 				wdata[index] = sqrtf(GRAV_ACCELERATION * glm::length(k));
@@ -151,7 +152,6 @@ bool Ocean::Init() {
 	oceanMesh->SetAttributeTable(subsettable, numSubsets);
 	delete[] subsettable;
 
-
 	// Shader
 	spectrumShader = new Shader("..\\asserts\\shaders\\spectrum.comp");
     spectrumShader->use();
@@ -187,20 +187,20 @@ bool Ocean::Init() {
 	perlin_noise = TextureFromFile("..\\asserts\\images\\perlin_noise.png");
 	glBindTexture(GL_TEXTURE_2D, perlin_noise);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxanisotropy / 2);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	envmap = loadCubemap(std::string("..\\asserts\\images\\ocean_env"));
 
 	// quadtree
 	float ocean_extent = PATCH_SIZE * (1 << FURTHEST_COVER);
-	float ocean_start[2] = { -0.5f * ocean_extent, -0.5f * ocean_extent };
-	tree.Initialize(glm::vec2(ocean_start[0], ocean_start[1]), ocean_extent, (int)numlods, MESH_SIZE, PATCH_SIZE, MAX_COVERAGE, (float)(1360 * 768));
+	glm::vec2 ocean_start(-0.5f * ocean_extent, -0.5f * ocean_extent);
+	tree.Initialize(ocean_start, ocean_extent, (int)numlods, MESH_SIZE, PATCH_SIZE, MAX_COVERAGE, (float)(1080 * 510));
 
 	return true;
 }
 
-void Ocean::Render(glm::mat4 world, glm::mat4 viewproj, glm::mat4 proj, glm::vec3 eye, double Elapsed) {
+void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elapsed) {
 	static float time = 0.0f;
-	time += Elapsed;
 
     spectrumShader->use();
     spectrumShader->setFloat("time", time);
@@ -235,68 +235,82 @@ void Ocean::Render(glm::mat4 world, glm::mat4 viewproj, glm::mat4 proj, glm::vec
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// render ocean
+	// ocean render
+	glm::mat4 view = camera.GetViewMatrix();
+	glm::mat4 viewproj = proj * view;
+	glm::vec3 eye = camera.getPos();
+	// world = glm::scale(world, glm::vec3(5.0f, 5.0f, 5.0f));
+	// build quadtree
 	tree.Rebuild(viewproj, proj, eye);
-
-	glm::vec4 perlinoffset(0.0f, 0.0f, 0.0f, 0.0f);
-	Vector2	w = WIND_DIRECTION;
-	glm::vec4 uvparams(0, 0, 0, 0);
-	glm::mat4 flipYZ(1, 0, 0, 0, 
-					0, 0, 1, 0, 
-					0, 1, 0, 0, 
-					0, 0, 0, 1);
-	glm::mat4 localtraf = glm::mat4(1.0f);
-	perlinoffset.x = -w.x * time * 0.06f;
-	perlinoffset.y = -w.y * time * 0.06f;
-	GLuint subset = 0;
+	
+	glm::mat4 flipYZ(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	glm::mat4 local_traf = glm::mat4(1.0f);
+	glm::vec4 uvparams(0.0f, 0.0f, 0.0f, 0.0f);
+	glm::vec2 perlin_offset(0.0f, 0.0f);
+	glm::vec2 w = WIND_DIRECTION;
 	int pattern[4];
+	GLuint subset = 0;
 	uvparams.x = 1.0f / PATCH_SIZE;
 	uvparams.y = 0.5f / DISP_MAP_SIZE;
-
+	perlin_offset.x = -w.x * time * 0.06f;
+	perlin_offset.y = -w.y * time * 0.06f;
 	oceanShader->use();
 	oceanShader->setMat4("matViewProj", viewproj);
-	oceanShader->setVec4("perlinOffset", perlinoffset);
+	oceanShader->setVec2("perlinOffset", perlin_offset);
 	oceanShader->setVec3("eyePos", eye);
-	oceanShader->setVec4("oceanColor", glm::vec4(0.0000f, 0.0103f, 0.0331f, 1));
+	oceanShader->setVec3("oceanColor", glm::vec3(0.1812f, 0.4678f, 0.5520f));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, displacement);
-
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, perlin_noise);
-
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, envmap);
-
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, gradients);
 
+	#if 1
+	float levelsize = (float)(MESH_SIZE >> 0);
+	float ocean_extent = PATCH_SIZE * (1 << FURTHEST_COVER);
+	glm::vec2 ocean_start(-0.5f * ocean_extent, -0.5f * ocean_extent);
+	float scale = PATCH_SIZE * (1 << FURTHEST_COVER) / levelsize;
+	local_traf = glm::scale(local_traf, glm::vec3(scale, scale, 0.0f));
+	world = glm::translate(world, glm::vec3(ocean_start[0], 0.0f, ocean_start[1]));
+	world = world * flipYZ;
+	uvparams.z = ocean_start[0] / PATCH_SIZE;
+	uvparams.w = ocean_start[1] / PATCH_SIZE;
+	oceanShader->setMat4("matLocal", local_traf);
+	oceanShader->setMat4("matWorld", world);
+	oceanShader->setVec4("uvParams", uvparams);
+	oceanMesh->Draw();
+	#endif
+
+	// QuadTree LOD not work...
+	#if 0
 	tree.Traverse([&](const QuadTree::Node& node) {
 		float levelsize = (float)(MESH_SIZE >> node.lod);
 		float scale = node.length / levelsize;
-
-		localtraf = glm::scale(localtraf, glm::vec3(scale, scale, 0.0f));
-		world = glm::translate(world, glm::vec3(node.start[0], 0, node.start[1]));
+		local_traf = glm::scale(local_traf, glm::vec3(scale, scale, 0.0f));
+		world = glm::translate(world, glm::vec3(node.start[0], 0.0f, node.start[1]));
 		world = world * flipYZ;
 
 		uvparams.z = node.start[0] / PATCH_SIZE;
 		uvparams.w = node.start[1] / PATCH_SIZE;
 
-		oceanShader->setMat4("matLocal", localtraf);
+		oceanShader->use();
+		oceanShader->setMat4("matLocal", local_traf);
 		oceanShader->setMat4("matWorld", world);
 		oceanShader->setVec4("uvParams", uvparams);
 
-		oceanMesh->Draw();
-		#if 0
 		tree.FindSubsetPattern(pattern, node);
 		subset = CalcSubsetIndex(node.lod, pattern[0], pattern[1], pattern[2], pattern[3]);
 		if (subset < oceanMesh->GetNumSubsets() - 1) {
 			oceanMesh->DrawSubset(subset);
 			oceanMesh->DrawSubset(subset + 1);
 		}
-		#endif
 	});
-
+	#endif
 	glActiveTexture(GL_TEXTURE0);
+	time += Elapsed;
 }
 
 void Ocean::FourierTransform(GLuint spectrum) {

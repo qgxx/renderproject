@@ -9,6 +9,7 @@
 #include "mesh.h"
 #include "core/qgemath.h"
 #include "quadtree.h"
+#include "../camera.h"
 
 #define DISP_MAP_SIZE		512					// 1024 max
 #define MESH_SIZE			256					// [64, 256] (or calculate index count for other levels)
@@ -37,7 +38,7 @@ public:
     Ocean() {}
     ~Ocean() {}
     bool Init();
-    void Render(glm::mat4 world, glm::mat4 viewproj, glm::mat4 proj, glm::vec3 eye, double Elapsed);
+    void Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elapsed);
     unsigned int getDisplacementID() { return displacement; }
 
 private:
