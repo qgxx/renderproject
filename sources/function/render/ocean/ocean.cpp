@@ -272,7 +272,7 @@ void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elaps
 	float levelsize = (float)(MESH_SIZE >> 0);
 	float ocean_extent = PATCH_SIZE * (1 << FURTHEST_COVER);
 	glm::vec2 ocean_start(-0.5f * ocean_extent, -0.5f * ocean_extent);
-	float scale = PATCH_SIZE * (1 << FURTHEST_COVER) / levelsize;
+	float scale = ocean_extent / levelsize;
 	local_traf = glm::scale(local_traf, glm::vec3(scale, scale, 0.0f));
 	world = glm::translate(world, glm::vec3(ocean_start[0], 0.0f, ocean_start[1]));
 	world = world * flipYZ;
