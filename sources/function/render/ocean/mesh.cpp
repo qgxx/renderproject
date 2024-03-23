@@ -1,5 +1,33 @@
 #include "mesh.h"
 
+oMesh::oMesh() {
+    numSubsets = 0;
+    subsetTable = nullptr;
+    numVertices = 0;
+    numIndices = 0;
+    meshOptions = 0;
+    VAO = VBO = EBO = 0;
+    materials = nullptr;
+}
+
+oMesh::~oMesh() {
+    Destroy();
+}
+
+void oMesh::Destroy() {
+    delete[] vertexDecl.Elements;
+
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
+
+    delete[] subsetTable;
+    delete[] materials;
+    subsetTable = nullptr;
+    materials = nullptr;
+    numSubsets = 0;
+}
+
 bool GLCreateMesh(GLuint numv, GLuint numi, GLuint options, OceanVertexElement* decl, oMesh** mesh) {
     oMesh* omesh = new oMesh();
     int num_decl_elements = 0;

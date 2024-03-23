@@ -88,6 +88,7 @@ public:
 		GLuint flags;
 	};
 
+	void Destroy();
 	void SetAttributeTable(const OceanAttribute* table, GLuint size);
 	GLuint GetNumSubsets() const { return numSubsets; }
 	void DrawSubset(GLuint subset, bool bindtextures = false);
@@ -111,7 +112,7 @@ private:
 	LockedData vertexdata_locked;
 	LockedData indexdata_locked;
 
-    oMesh() {}
+    oMesh();
 	void RecreateVertexLayout();
 };
 

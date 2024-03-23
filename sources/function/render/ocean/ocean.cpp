@@ -268,7 +268,7 @@ void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elaps
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, gradients);
 
-	#if 1
+	#if 0
 	float levelsize = (float)(MESH_SIZE >> 0);
 	float ocean_extent = PATCH_SIZE * (1 << FURTHEST_COVER);
 	glm::vec2 ocean_start(-0.5f * ocean_extent, -0.5f * ocean_extent);
@@ -285,12 +285,13 @@ void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elaps
 	#endif
 
 	// QuadTree LOD not work...
-	#if 0
+	#if 1
 	tree.Traverse([&](const QuadTree::Node& node) {
 		float levelsize = (float)(MESH_SIZE >> node.lod);
 		float scale = node.length / levelsize;
 		local_traf = glm::scale(local_traf, glm::vec3(scale, scale, 0.0f));
 		world = glm::translate(world, glm::vec3(node.start[0], 0.0f, node.start[1]));
+		world = glm::translate(world, glm::vec3(2000.0f, 0.0f, 2000.0f));
 		world = world * flipYZ;
 
 		uvparams.z = node.start[0] / PATCH_SIZE;
