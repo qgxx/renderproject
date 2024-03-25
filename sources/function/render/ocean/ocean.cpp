@@ -194,7 +194,7 @@ bool Ocean::Init() {
 	// quadtree
 	float ocean_extent = PATCH_SIZE * (1 << FURTHEST_COVER);
 	glm::vec2 ocean_start(-0.5f * ocean_extent, -0.5f * ocean_extent);
-	tree.Initialize(ocean_start, ocean_extent, (int)numlods, MESH_SIZE, PATCH_SIZE, MAX_COVERAGE, (float)(1080 * 510));
+	tree.Initialize(ocean_start, ocean_extent, (int)numlods, MESH_SIZE, PATCH_SIZE, MAX_COVERAGE, (float)(1960 * 1080));
 
 	return true;
 }
@@ -236,9 +236,11 @@ void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elaps
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// ocean render
-	glm::mat4 view = camera.GetViewMatrix();
+	Camera tmp = camera;
+	tmp.Position += glm::vec3(-2000.0f, 0.0f, -2000.0f);
+	glm::mat4 view = tmp.GetViewMatrix();
 	glm::mat4 viewproj = proj * view;
-	glm::vec3 eye = camera.getPos();
+	glm::vec3 eye = tmp.getPos();
 	// world = glm::scale(world, glm::vec3(5.0f, 5.0f, 5.0f));
 	// build quadtree
 	tree.Rebuild(viewproj, proj, eye);
@@ -291,7 +293,7 @@ void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elaps
 		float scale = node.length / levelsize;
 		local_traf = glm::scale(local_traf, glm::vec3(scale, scale, 0.0f));
 		world = glm::translate(world, glm::vec3(node.start[0], 0.0f, node.start[1]));
-		world = glm::translate(world, glm::vec3(2000.0f, 0.0f, 2000.0f));
+		world = glm::translate(world, glm::vec3(300.0f, 0.0f, 300.0f));
 		world = world * flipYZ;
 
 		uvparams.z = node.start[0] / PATCH_SIZE;

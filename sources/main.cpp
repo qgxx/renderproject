@@ -180,7 +180,7 @@ int main() {
         ourModel.Draw(ourShader);
 
         model = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 2000.0f);
+        projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 1000.0f);
 		QueryPerformanceCounter(&qwTime);
 		current = (qwTime.QuadPart % tickspersec) / (double)tickspersec;
 		if (current < last) delta = ((1.0 + current) - last);
