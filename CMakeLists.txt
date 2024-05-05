@@ -4,9 +4,9 @@ project(TinyQGameEngine)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# include(CMakeLists.txt.glfw)
 include(CMakeLists.txt.imgui)
 include(sources/function/render/CMakeLists.txt.render)
+include(sources/function/animation/CMakeLists.txt.animation)
 include(sources/core/message/CMakeLists.txt.message)
 include(sources/core/CMakeLists.txt.core)
 
@@ -17,9 +17,10 @@ include_directories(depends/JoltPhysics/include)
 include_directories(depends/glad/include)
 include_directories(depends/GLFW/include)
 include_directories(sources)
+include_directories(sources/function)
 
 add_executable(TinyQGameEngine sources/main.cpp ${imgui_sources} ${render_sources} ${message_sources} 
-${core_sources} depends/glad/src/glad.c)
+${core_sources} ${animation_sources} depends/glad/src/glad.c)
 
 # copy dll to build directory
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

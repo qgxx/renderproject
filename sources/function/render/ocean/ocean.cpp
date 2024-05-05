@@ -286,7 +286,6 @@ void Ocean::Render(glm::mat4 world, glm::mat4 proj, Camera& camera, double Elaps
 	oceanMesh->Draw();
 	#endif
 
-	// QuadTree LOD not work...
 	#if 1
 	tree.Traverse([&](const QuadTree::Node& node) {
 		float levelsize = (float)(MESH_SIZE >> node.lod);

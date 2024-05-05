@@ -4,7 +4,7 @@
 #define BLEND_START		8		// m
 #define BLEND_END		200		// m
 
-in vec3 my_Position;
+layout (location = 0) in vec3 my_Position;
 
 layout (binding = 0) uniform sampler2D displacement;
 layout (binding = 1) uniform sampler2D perlin;
