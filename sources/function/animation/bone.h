@@ -2,12 +2,23 @@
 #define __BONE_H__
 
 #include <vector>
-#include <assimp/scene.h>
 #include <list>
+#include <string>
+#include <unordered_map>
+#include <assimp/scene.h>
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "core/utils/depends_helper.hpp"
+
+struct BoneNode {
+	// skeletal
+    glm::mat4 transformation;
+    std::string name;
+    int childrenCount;
+    std::vector<BoneNode> children;
+};
 
 struct BoneInfo {
     int id;
@@ -36,6 +47,10 @@ public:
     int GetPositionIndex(float animationTime);
     int GetRotationIndex(float animationTime);
     int GetScaleIndex(float animationTime);
+
+	glm::mat4 GetLocalTransform() { return m_LocalTransform; }
+	std::string GetBoneName() const { return m_Name; }
+	int GetBoneID() { return m_ID; }
 
 private:
     float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);

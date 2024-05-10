@@ -6,30 +6,21 @@ m_Name { name }, m_ID { ID }, m_LocalTransform { 1.0f } {
     for (int idx = 0; idx < m_NumPositions; ++idx) {
         aiVector3D aiPosition = channel->mPositionKeys[idx].mValue;
         float timeStamp = channel->mPositionKeys[idx].mTime;
-        KeyPosition data;
-        data.position = AssimpGLMHelpers::GetGLMVec(aiPosition);
-        data.timeStamp = timeStamp;
-        m_Positions.push_back(data);
+        m_Positions.push_back({AssimpGLMHelpers::GetGLMVec(aiPosition), timeStamp});
     }
 
     m_NumRotations = channel->mNumRotationKeys;
     for (int idx = 0; idx < m_NumRotations; ++idx) {
         aiQuaternion aiOrientation = channel->mRotationKeys[idx].mValue;
         float timeStamp = channel->mRotationKeys[idx].mTime;
-        KeyRotation data;
-        data.orientation = AssimpGLMHelpers::GetGLMQuat(aiOrientation);
-        data.timeStamp = timeStamp;
-        m_Rotations.push_back(data);
+        m_Rotations.push_back({AssimpGLMHelpers::GetGLMQuat(aiOrientation), timeStamp});
     }
 
     m_NumScalings = channel->mNumScalingKeys;
     for (int idx = 0; idx < m_NumScalings; ++idx) {
         aiVector3D scale = channel->mScalingKeys[idx].mValue;
         float timeStamp = channel->mScalingKeys[idx].mTime;
-        KeyScale data;
-        data.scale = AssimpGLMHelpers::GetGLMVec(scale);
-        data.timeStamp = timeStamp;
-        m_Scales.push_back(data);
+        m_Scales.push_back({AssimpGLMHelpers::GetGLMVec(scale), timeStamp});
     }
 }
 
@@ -41,24 +32,27 @@ void Bone::Update(float animationTime) {
 }
 
 int Bone::GetPositionIndex(float animationTime) {
-    for (int index = 0; index < m_NumPositions - 1; ++index) {
+    int index = 0;
+    for (; index < m_NumPositions - 1; ++index) {
         if (animationTime < m_Positions[index + 1].timeStamp) return index;
     }
-    assert(0);
+    return index;
 }
 
 int Bone::GetRotationIndex(float animationTime) {
-    for (int index = 0; index < m_NumRotations - 1; ++index) {
+    int index = 0;
+    for (; index < m_NumRotations - 1; ++index) {
         if (animationTime < m_Rotations[index + 1].timeStamp) return index;
     }
-    assert(0);
+    return index;
 }
 
 int Bone::GetScaleIndex(float animationTime) {
-    for (int index = 0; index < m_NumScalings - 1; ++index) {
+    int index = 0;
+    for (; index < m_NumScalings - 1; ++index) {
         if (animationTime < m_Scales[index + 1].timeStamp) return index;
     }
-    assert(0);
+    return index;
 }
 
 float Bone::GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime) {

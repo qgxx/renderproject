@@ -20,7 +20,7 @@ include_directories(sources)
 include_directories(sources/function)
 
 add_executable(TinyQGameEngine sources/main.cpp ${imgui_sources} ${render_sources} ${message_sources} 
-${core_sources} ${animation_sources} depends/glad/src/glad.c)
+${core_sources} ${animation_sources} depends/glad/src/glad.c sources/resource/resource.cpp)
 
 # copy dll to build directory
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

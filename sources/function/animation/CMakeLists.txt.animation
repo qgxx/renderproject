@@ -2,4 +2,5 @@ set(animation_dir sources/function/animation)
 set(animation_sources ${animation_dir}/animator.cpp 
 ${animation_dir}/bone.cpp 
 ${animation_dir}/animation.cpp 
-${animation_dir}/model.cpp)
+${animation_dir}/model.cpp 
+${animation_dir}/mesh.cpp)

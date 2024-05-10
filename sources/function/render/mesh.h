@@ -10,7 +10,7 @@
 #include <vector>
 
 
-#define MAX_BONE_INFLUENCE 4
+#define MAX_BONE_INFLUENCE 5
 
 struct Vertex {
 	glm::vec3 Position;

@@ -2,77 +2,268 @@
 #include "core/utils/depends_helper.hpp"
 #include <stb/stb_image.h>
 
-void aModel::loadModel(const std::string& path) {
-    // read file via Assimp
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	// check for errors
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-		return;
-	}
-	// retrieve the directory path of the filepath
-	directory = path.substr(0, path.find_last_of('\\'));
-	// process ASSIMP's root node recursively
-	processNode(scene->mRootNode, scene);
-} 
+std::vector<std::thread> texture_threads;
+std::mutex texture_mtx;
+struct TextureData {
+    int width, height, nrComponents;
+    unsigned int textureID;
+    unsigned char *data;
+};
+std::vector<TextureData> textureData;
 
-void aModel::processNode(aiNode* node, const aiScene* scene) {
-	// process each mesh located at the current node
-	for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
-	}
-	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		processNode(node->mChildren[i], scene);
+std::vector<TetxtureType> textureTypes{
+    {aiTextureType_DIFFUSE, "d"},
+    {aiTextureType_HEIGHT, "n"},
+    {aiTextureType_NORMALS, "n"},
+    {aiTextureType_METALNESS, "m"},
+    {aiTextureType_SPECULAR, "m"},
+    {aiTextureType_DIFFUSE_ROUGHNESS, "r"},
+    {aiTextureType_SHININESS, "r"},
+    {aiTextureType_LIGHTMAP, "a"},
+    {aiTextureType_AMBIENT, "a"},
+    {aiTextureType_EMISSIVE, "e"}};
+
+void TextureFromData(std::vector<TextureData> &textureData);
+void TextureFromFileThread(unsigned int texture_id, std::string filename);
+
+aModel::aModel(std::string const& path, [[maybe_unused]] bool gamma) {
+    texture_threads.clear();
+
+    loadModel(path);
+
+    for (auto& thread : texture_threads) {
+        thread.join();
+    }
+    TextureFromData(textureData);
+}
+aModel::aModel(const aiScene *scene, const std::string path) {
+    texture_threads.clear();
+
+    directory = path.substr(0, path.find_last_of("\\"));
+    processNode(scene->mRootNode, scene);
+
+    for (auto& thread : texture_threads) {
+        thread.join();
+    }
+    TextureFromData(textureData);
 }
 
-Mesh aModel::processMesh(aiMesh* mesh, const aiScene* scene) {
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+void aModel::Draw(Shader &shader) {
+    for (unsigned int i = 0; i < m_meshes.size(); i++) {
+        m_meshes[i].Draw(shader, morphAnimKeys);
+    }
+}
 
+void aModel::DrawInstance(Shader& shader) {
+    for (unsigned int i = 0; i < m_meshes.size(); i++) {
+        m_meshes[i].DrawInstance(shader);
+    }
+}
+
+void aModel::SetVertexBoneDataToDefault(aMesh::Vertex &vertex) {
+    for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
+        vertex.m_BoneIDs[i] = -1;
+        vertex.m_Weights[i] = 0.0f;
+    }
+}
+
+void aModel::SetVertexBoneData(aMesh::Vertex &vertex, int boneID, float weight) {
+    for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
+        if (vertex.m_BoneIDs[i] < 0) {
+            vertex.m_BoneIDs[i] = boneID;
+            vertex.m_Weights[i] = weight;
+            break;
+        }
+    }
+}
+
+void aModel::ExtractBoneWeightForVertices(std::vector<aMesh::Vertex> &vertices, aiMesh *mesh) {
+    int newBoneID = m_BoneInfoMap.size();
+    for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+        int boneID = -1;
+        std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+        if (m_BoneInfoMap.find(boneName) == m_BoneInfoMap.end()) {
+            BoneInfo newBoneInfo;
+            newBoneInfo.id = newBoneID;
+            newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
+            m_BoneInfoMap[boneName] = newBoneInfo;
+            boneID = newBoneID;
+            ++newBoneID;
+        }
+        else {
+            boneID = m_BoneInfoMap[boneName].id;
+        }
+        assert(boneID != -1);
+        auto weights = mesh->mBones[boneIndex]->mWeights;
+        int numWeights = mesh->mBones[boneIndex]->mNumWeights;
+        for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex) {
+            unsigned int vertexId = weights[weightIndex].mVertexId;
+            float weight = weights[weightIndex].mWeight;
+            assert(vertexId <= vertices.size());
+            if (weight != .0f)
+                SetVertexBoneData(vertices[vertexId], boneID, weight);
+        }
+    }
+}
+
+void aModel::loadModel(std::string const &path) {
+    // read file via assimp
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    // check for errors
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+    {
+        std::cout << "ERROR::ASSIMP" << importer.GetErrorString() << std::endl;
+    }
+    // retrieve the directory path of the filepath
+    directory = path.substr(0, path.find_last_of('\\'));
+    // process assimp's root node recursive
+    processNode(scene->mRootNode, scene);
+}
+
+void aModel::processNode(aiNode *node, const aiScene *scene) {
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        m_meshes.push_back(processMesh(mesh, scene));
+    }
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        processNode(node->mChildren[i], scene);
+    }
+}
+aMesh aModel::processMesh(aiMesh *mesh, const aiScene *scene) {
+    std::vector<aMesh::Vertex> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<Materials> materials;
+
+    // morph shapeKeysNameID
+    {
+        static bool first = false;
+        if (first) {
+            for (unsigned int i = 0; i < mesh->mNumAnimMeshes; i++) {
+                shapeKeysNameID.insert(std::make_pair(i, mesh->mAnimMeshes[i]->mName.data));
+            } 
+        }
+        first = false;
+    }
+
+    // morphAnims 
+    std::unordered_map<std::string, std::vector<glm::vec3>> morphAnims;
+    for (unsigned int i = 0; i < mesh->mNumAnimMeshes; i++) {
+        std::vector<glm::vec3> vecs;
+        vecs.resize(mesh->mNumVertices);
+        for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+            vecs[j] = (AssimpGLMHelpers::GetGLMVec(mesh->mAnimMeshes[i]->mVertices[j] - mesh->mVertices[j]));
+        }
+
+        // The shapekey of the mesh has not changed, so it is not needed.
+        bool nonZeroPresent = std::any_of(vecs.begin(), vecs.end(), [](const glm::vec3 &vec)
+                                          { return vec != glm::vec3(.0f); });
+
+        if (nonZeroPresent)
+            morphAnims.insert(make_pair(mesh->mAnimMeshes[i]->mName.data, vecs));
+    }
+
+    vertices.resize(mesh->mNumVertices);
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
+        aMesh::Vertex vertex;
         SetVertexBoneDataToDefault(vertex);
+
         vertex.Position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
-        vertex.Normal = AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]);
-        
-        if (mesh->mTextureCoords[0]) {
+
+        // normals
+        if (mesh->HasNormals())
+        {
+            vertex.Normal = AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]);
+        }
+        // texture coordinates
+        if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+        {
             glm::vec2 vec;
+            // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
+            // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.TexCoords = vec;
+            // tangent
+            vertex.Tangent = AssimpGLMHelpers::GetGLMVec(mesh->mTangents[i]);
+            // bitangent
+            vertex.Bitangent = AssimpGLMHelpers::GetGLMVec(mesh->mBitangents[i]);
         }
         else
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
-        vertices.push_back(vertex);
+        vertices[i] = (vertex);
     }
+
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
+        // retrieve all indices of the face and store them in the indices vector
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
-    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-    std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-    ExtractBoneWeightForVertices(vertices,mesh,scene);
+    for (const auto &textureType : textureTypes)
+    {
+        loadMaterialTextures(materials, material, textureType.type, textureType.prefix);
+    }
 
-    return Mesh(vertices, indices, textures);
+    ExtractBoneWeightForVertices(vertices, mesh);
+
+    // return a mesh object created from the extracted mesh data
+    if (morphAnims.size())
+        return aMesh(vertices, indices, materials, morphAnims);
+    else
+        return aMesh(vertices, indices, materials);
 }
 
-void aModel::SetVertexBoneDataToDefault(Vertex& vertex) {
-    for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
-        vertex.m_BoneIDs[i] = -1;
-        vertex.m_Weights[i] = 0.0f;
+void aModel::loadMaterialTextures(std::vector<Materials> &materials, aiMaterial *mat, aiTextureType type, std::string typeName) {
+
+}
+
+void TextureFromData(std::vector<TextureData> &textureData) {
+    for (auto &texture : textureData) {   
+        GLenum internalformat = 0;
+        GLenum dataformat = 0;
+        if (texture.nrComponents == 1)
+        {
+            internalformat = dataformat = GL_RED;
+        }
+        else if (texture.nrComponents == 3)
+        {
+            internalformat = GL_RGB;
+            dataformat = GL_RGB;
+        }
+        else if (texture.nrComponents == 4)
+        {
+            internalformat = GL_RGBA;
+            dataformat = GL_RGBA;
+        }
+        glBindTexture(GL_TEXTURE_2D, texture.textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalformat, texture.width, texture.height, 0, dataformat, GL_UNSIGNED_BYTE, texture.data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        stbi_image_free(texture.data);
+    }
+    textureData.clear();
+}
+
+void TextureFromFileThread(unsigned int texture_id, std::string filename) {
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        std::lock_guard<std::mutex> lock(texture_mtx);
+        textureData.push_back({width, height, nrComponents, texture_id, data});
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << filename << std::endl;
+        stbi_image_free(data);
     }
 }

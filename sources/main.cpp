@@ -32,7 +32,7 @@
 #include "function/render/ocean/ocean.h"
 #include "core/qgetime.h"
 #include "core/qgetime.h"
-
+#include "animation/animator.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -120,15 +120,31 @@ int main() {
     Shader ourShader("..\\asserts\\shaders\\model_loading.vs", "..\\asserts\\shaders\\model_loading.fs");
     Model ourModel("..\\asserts\\models\\Elysia_maid\\Elysia.pmx");
 
+    #if 1
+    aModel* model_aru = nullptr;
+    Animations *pAnimations = nullptr;
+    Animator *pAnimator = nullptr;
+    Shader aniShader("..\\asserts\\shaders\\model_animation.vs", "..\\asserts\\shaders\\model_animation.fs");
+    ModelImport("..\\asserts\\models\\hutao\\hutao_multi2.fbx", &model_aru, &pAnimations, &pAnimator, aniShader);
+
+    std::vector<std::string> animNames = pAnimations->GetAnimationNames();
+    float duration = pAnimator->GetAnimationDuration();
+    bool playBackState = false;
+    int animIndex = 0;
+    float playSpeed = 1.0f;
+    #endif
+
+    #if 1
     Ocean ocean;
     ocean.Init();
-    
+    #endif
+
     SkyBox skybox("..\\asserts\\images\\ocean_env");
     Shader skyboxShader("..\\asserts\\shaders\\skybox.vs", "..\\asserts\\shaders\\skybox.fs");
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
-    #if 0
+    #if 1
     Terrain terrain(2.0f, 33);
     terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
@@ -157,7 +173,7 @@ int main() {
 	tickspersec = qwTicksPerSec.QuadPart;
 	QueryPerformanceCounter(&qwTime);
 	last = (qwTime.QuadPart % tickspersec) / (double)tickspersec;
-
+    
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -167,7 +183,7 @@ int main() {
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-
+        
         ourShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -179,6 +195,36 @@ int main() {
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
+        aniShader.use();
+        if (animNames[animIndex] != pAnimator->GetAnimationName())
+        {
+            pAnimator->PlayAnimation(&pAnimations->GetAnimations()[animIndex]);
+            duration = pAnimator->GetAnimationDuration();
+        }
+        if (playBackState)
+        {
+            pAnimator->UpdateAnimation(deltaTime * playSpeed);
+            currentFrame = pAnimator->GetCurrentFrame();
+        }
+        else
+        {
+            pAnimator->SetCurrentTime(currentFrame);
+            pAnimator->UpdateAnimation(.0f);
+        }
+
+        #if 1
+        aniShader.use();
+        aniShader.setMat4("projection", projection);
+        aniShader.setMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(20.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+        aniShader.setMat4("model", model);
+        model_aru->Draw(aniShader);
+        #endif
+
+        #if 1
+        // ocean
         model = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 1000.0f);
 		QueryPerformanceCounter(&qwTime);
@@ -188,6 +234,7 @@ int main() {
 		last = current;
 		accum += delta;
         ocean.Render(model, projection, camera, (float)delta);
+        #endif
 
         glDepthFunc(GL_LEQUAL);  
         skyboxShader.use();
@@ -196,7 +243,8 @@ int main() {
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
 
-        #if 0
+        #if 1
+        // terrain
         terrainShader.use();
         view = camera.GetViewMatrix();
         terrainShader.setMat4("view", view);
