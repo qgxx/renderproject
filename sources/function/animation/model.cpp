@@ -31,20 +31,20 @@ aModel::aModel(std::string const& path, [[maybe_unused]] bool gamma) {
 
     loadModel(path);
 
-    for (auto& thread : texture_threads) {
+    for (auto &thread : texture_threads)
         thread.join();
-    }
     TextureFromData(textureData);
 }
 aModel::aModel(const aiScene *scene, const std::string path) {
     texture_threads.clear();
 
-    directory = path.substr(0, path.find_last_of("\\"));
+    // retrieve the directory path of the filepath
+    directory = path.substr(0, path.find_last_of('\\'));
+    // process assimp's root node recursive
     processNode(scene->mRootNode, scene);
 
-    for (auto& thread : texture_threads) {
+    for (auto &thread : texture_threads)
         thread.join();
-    }
     TextureFromData(textureData);
 }
 
@@ -123,35 +123,40 @@ void aModel::loadModel(std::string const &path) {
 
 void aModel::processNode(aiNode *node, const aiScene *scene) {
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         m_meshes.push_back(processMesh(mesh, scene));
     }
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
         processNode(node->mChildren[i], scene);
     }
 }
 aMesh aModel::processMesh(aiMesh *mesh, const aiScene *scene) {
+    // data to fill
     std::vector<aMesh::Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Materials> materials;
 
-    // morph shapeKeysNameID
+    // ----------------------------morph shapeKeysNameID
     {
-        static bool first = false;
-        if (first) {
-            for (unsigned int i = 0; i < mesh->mNumAnimMeshes; i++) {
+        static bool first = true;
+        // first mesh storge all the shapekeys
+        if (first)
+            for (unsigned int i = 0; i < mesh->mNumAnimMeshes; ++i)
+            {
                 shapeKeysNameID.insert(std::make_pair(i, mesh->mAnimMeshes[i]->mName.data));
-            } 
-        }
+            }
         first = false;
     }
 
-    // morphAnims 
+    //  ----------------------------morph
     std::unordered_map<std::string, std::vector<glm::vec3>> morphAnims;
-    for (unsigned int i = 0; i < mesh->mNumAnimMeshes; i++) {
+    for (unsigned int i = 0; i < mesh->mNumAnimMeshes; ++i)
+    {
         std::vector<glm::vec3> vecs;
         vecs.resize(mesh->mNumVertices);
-        for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+        for (unsigned int j = 0; j < mesh->mNumVertices; j++)
+        {
             vecs[j] = (AssimpGLMHelpers::GetGLMVec(mesh->mAnimMeshes[i]->mVertices[j] - mesh->mVertices[j]));
         }
 
@@ -163,8 +168,10 @@ aMesh aModel::processMesh(aiMesh *mesh, const aiScene *scene) {
             morphAnims.insert(make_pair(mesh->mAnimMeshes[i]->mName.data, vecs));
     }
 
+    // ----------------------------vertices
     vertices.resize(mesh->mNumVertices);
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+    {
         aMesh::Vertex vertex;
         SetVertexBoneDataToDefault(vertex);
 
@@ -195,13 +202,42 @@ aMesh aModel::processMesh(aiMesh *mesh, const aiScene *scene) {
         vertices[i] = (vertex);
     }
 
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+    // ----------------------------indices
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    {
         aiFace face = mesh->mFaces[i];
         // retrieve all indices of the face and store them in the indices vector
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
 
+    // ----------------------------materials
+    // DiffuseTexture = "map_Kd";
+    // AmbientTexture = "map_Ka";
+    // SpecularTexture = "map_Ks";
+    // OpacityTexture = "map_d";
+    // EmissiveTexture1 = "map_emissive";
+    // EmissiveTexture2 = "map_Ke";
+    // BumpTexture1 = "map_bump";
+    // BumpTexture2 = "bump";
+    // NormalTextureV1 = "map_Kn";
+    // NormalTextureV2 = "norm";
+    // ReflectionTexture = "refl";
+    // DisplacementTexture1 = "map_disp";
+    // DisplacementTexture2 = "disp";
+    // SpecularityTexture = "map_ns";
+    // RoughnessTexture = "map_Pr";
+    // MetallicTexture = "map_Pm";
+    // SheenTexture = "map_Ps";
+    // RMATexture = "map_Ps";
+
+    // gltf----------------------------obj---------------------------------name
+    // aiTextureType_DIFFUSE           aiTextureType_DIFFUSE        map_Kd albedo      0
+    // aiTextureType_NORMALS           aiTextureType_NORMALS        map_Kn normal      1
+    // aiTextureType_METALNESS         aiTextureType_SPECULAR       map_Ks metallic    2
+    // aiTextureType_DIFFUSE_ROUGHNESS aiTextureType_SHININESS      map_Ns roughness   3
+    // aiTextureType_LIGHTMAP          aiTextureType_AMBIENT        map_Ka ao          4
+    // aiTextureType_EMISSIVE          aiTextureType_EMISSIVE       map_Ke emissive    5
     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
     for (const auto &textureType : textureTypes)
@@ -209,6 +245,18 @@ aMesh aModel::processMesh(aiMesh *mesh, const aiScene *scene) {
         loadMaterialTextures(materials, material, textureType.type, textureType.prefix);
     }
 
+    // if there is no texture, colorOnly
+    // if (materials.size() == 0)
+    // {
+    //     Materials material_temp;
+    //     material_temp.id = -1;
+    //     aiColor3D color;
+    //     material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+    //     material_temp.color = glm::vec3(color.r, color.g, color.b);
+    //     materials.push_back(material_temp);
+    // }
+
+    // ---------------------------- BoneWeights
     ExtractBoneWeightForVertices(vertices, mesh);
 
     // return a mesh object created from the extracted mesh data
@@ -219,11 +267,43 @@ aMesh aModel::processMesh(aiMesh *mesh, const aiScene *scene) {
 }
 
 void aModel::loadMaterialTextures(std::vector<Materials> &materials, aiMaterial *mat, aiTextureType type, std::string typeName) {
+    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+    {
+        aiString str;
+        mat->GetTexture(type, i, &str);
+        // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+        bool skip = false;
+        for (unsigned int j = 0; j < m_materials.size(); j++)
+        {
+            if (std::strcmp(m_materials[j].path.data(), str.C_Str()) == 0)
+            {
+                materials.push_back(m_materials[j]);
+                skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                break;
+            }
+        }
+        if (!skip) { // if texture hasn't been loaded already, load it
+            Materials texture;
 
+            unsigned int textureID;
+            glGenTextures(1, &textureID);
+            texture.id = textureID;
+            std::string filepath = this->directory + '/' + str.C_Str();
+            texture_threads.emplace_back(TextureFromFileThread, textureID, filepath);
+
+            // texture.id = TextureFromFile(str.C_Str(), this->directory);
+            texture.type = typeName;
+            texture.path = str.C_Str();
+            materials.push_back(texture);
+            m_materials.push_back(texture); // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+        }
+    }
 }
 
-void TextureFromData(std::vector<TextureData> &textureData) {
-    for (auto &texture : textureData) {   
+void TextureFromData(std::vector<TextureData>& textureData)
+{
+    for (auto &texture : textureData)
+    {   
         GLenum internalformat = 0;
         GLenum dataformat = 0;
         if (texture.nrComponents == 1)
@@ -254,6 +334,8 @@ void TextureFromData(std::vector<TextureData> &textureData) {
 }
 
 void TextureFromFileThread(unsigned int texture_id, std::string filename) {
+    stbi_set_flip_vertically_on_load(false);
+
     int width, height, nrComponents;
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)

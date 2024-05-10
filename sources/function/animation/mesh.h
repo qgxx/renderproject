@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "render/shader.h"
 
-#define MAX_BONE_INFLUENCE 5
+#define MAX_BONE_INFLUENCE 4
 
 struct Materials {
     int id;
@@ -34,6 +34,14 @@ public:
 		float m_Weights[MAX_BONE_INFLUENCE];
 	};
 
+	std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<Materials> materials;
+	unsigned int VAO;
+	std::vector<glm::vec3> mPositions;
+    std::unordered_map<std::string, std::vector<glm::vec3>> morphAnims;
+
+
 	aMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Materials> materials);
     aMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Materials> materials, 
 	std::unordered_map<std::string, std::vector<glm::vec3>> morphAnims);
@@ -43,14 +51,7 @@ public:
     void DrawInstance(Shader &shader);
 
 private:
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Materials> materials;
-	
-	std::vector<glm::vec3> mPositions;
-    std::unordered_map<std::string, std::vector<glm::vec3>> morphAnims;
-
-	unsigned int VAO, VBO, EBO;
+	unsigned int VBO, EBO;
 	unsigned int VBO_Position;
 
 	void setupMesh();

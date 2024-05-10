@@ -31,21 +31,34 @@ void aMesh::Draw([[maybe_unused]] Shader &shader) {
 }
 
 void aMesh::Draw([[maybe_unused]] Shader &shader, std::unordered_map<std::string, float> morphanimkeys) {
-    for (unsigned int i = 0; i < materials.size(); i++) {
+    // bind appropriate textures
+    for (unsigned int i = 0; i < materials.size(); i++)
+    {
+        // if (materials[i].id != -1)
+        // {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, materials[i].id);
+        // shader.SetUniform4f("colorOnly", glm::vec4(-1.0));
+        // }
+        // else
+        // shader.SetUniform4f("colorOnly", glm::vec4(materials[i].color, 1.0));
     }
     glBindVertexArray(VAO);
 
-    if (!morphAnims.empty()) {
+    if (!morphAnims.empty())
+    {
         std::vector<glm::vec3> vers = mPositions;
-        if (!morphanimkeys.empty()){
-            for (const auto &morphanimkey : morphanimkeys) {
+        if (!morphanimkeys.empty())
+        {
+            for (const auto &morphanimkey : morphanimkeys)
+            {
                 std::string keyName = morphanimkey.first;
                 float keyValue = morphanimkey.second;
-                if (morphAnims.count(keyName)) {
+                if (morphAnims.count(keyName))
+                {
                     auto &positions = morphAnims[keyName];
-                    for (unsigned int i = 0; i < mPositions.size(); ++i) {
+                    for (unsigned int i = 0; i < mPositions.size(); ++i)
+                    {
                         vers[i] += (positions[i] * keyValue);
                     }
                 }

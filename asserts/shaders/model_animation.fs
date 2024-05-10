@@ -1,12 +1,10 @@
-#version 430 core
-
-out vec4 FragColor;
-
+#version 420 core
 in vec2 TexCoords;
-
-uniform sampler2D texture_diffuse1;
-
+out vec4 color;
+uniform sampler2D image;
+// uniform vec4 colorOnly = vec4(.0,.0,.0,-1.0);
 void main()
-{    
-    FragColor = texture(texture_diffuse1, TexCoords);
-}
+{
+    // color = (colorOnly.a != -1) ? colorOnly : (texture(image, TexCoords));
+    color = texture(image, TexCoords);
+} 

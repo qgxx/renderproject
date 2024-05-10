@@ -129,12 +129,12 @@ int main() {
 
     std::vector<std::string> animNames = pAnimations->GetAnimationNames();
     float duration = pAnimator->GetAnimationDuration();
-    bool playBackState = false;
+    bool playBackState = true;
     int animIndex = 0;
     float playSpeed = 1.0f;
     #endif
 
-    #if 1
+    #if 0
     Ocean ocean;
     ocean.Init();
     #endif
@@ -144,7 +144,7 @@ int main() {
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
-    #if 1
+    #if 0
     Terrain terrain(2.0f, 33);
     terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
@@ -214,16 +214,14 @@ int main() {
 
         #if 1
         aniShader.use();
-        aniShader.setMat4("projection", projection);
-        aniShader.setMat4("view", view);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(20.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
-        aniShader.setMat4("model", model);
+        aniShader.setMat4("pvm", projection * view * model);
         model_aru->Draw(aniShader);
         #endif
 
-        #if 1
+        #if 0
         // ocean
         model = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 1000.0f);
@@ -243,7 +241,7 @@ int main() {
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
 
-        #if 1
+        #if 0
         // terrain
         terrainShader.use();
         view = camera.GetViewMatrix();
