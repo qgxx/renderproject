@@ -134,7 +134,7 @@ int main() {
     float playSpeed = 1.0f;
     #endif
 
-    #if 0
+    #if 1
     Ocean ocean;
     ocean.Init();
     #endif
@@ -144,7 +144,7 @@ int main() {
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
-    #if 0
+    #if 1
     Terrain terrain(2.0f, 33);
     terrain.setTexScale(4.0f);
     Shader terrainShader("..\\asserts\\shaders\\terrain.vs", "..\\asserts\\shaders\\terrain.fs");
@@ -221,7 +221,7 @@ int main() {
         model_aru->Draw(aniShader);
         #endif
 
-        #if 0
+        #if 1
         // ocean
         model = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 1000.0f);
@@ -241,7 +241,7 @@ int main() {
         skyboxShader.setMat4("projection", projection);
         skybox.Draw(skyboxShader);
 
-        #if 0
+        #if 1
         // terrain
         terrainShader.use();
         view = camera.GetViewMatrix();

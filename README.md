@@ -27,3 +27,7 @@ OpenGL & basic computer graphics: [LearnOpenGL CN](https://learnopengl-cn.github
 OpenGL & basic computer graphics: [LearnOpenGL](https://learnopengl.com/)  
 GameEngine Architecture: [GAMES104](https://games104.boomingtech.com/sc/)  
 Ocean & OpenGL extension: Asylum  
+
+# Screenshots
+![gpu-ocean](./asserts/screenshots/gpu-ocean.png)
+![terrain](./asserts/screenshots//terrain.png)
