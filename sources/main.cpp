@@ -1,5 +1,7 @@
 #include <glad/glad.h>
+#ifdef __GNUC__
 #include <GL/glext.h>
+#endif
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -105,7 +107,9 @@ int main() {
     glCullFace(GL_BACK);
     glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
     maxanisotropy = 1;
+    #ifdef __GNUC__
     glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxanisotropy);
+    #endif
     maxanisotropy = std::max(maxanisotropy, 2);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
